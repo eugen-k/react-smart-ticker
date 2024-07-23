@@ -15,18 +15,17 @@ export type SmartTickerProps = {
    */
   isText?: boolean
   /**
-   * @description Determines the number of lines within a text content
+   * @description Determines the maximum amount of lines within a text content
    * @default 0
    */
   multiLine?: number
   /**
-   * @description Speed in pixels per second
+   * @description Scrolling speed in pixels per second
    * @default 60
    */
   speed?: number
   /**
-   * @description Delay before starting the animation (in milliseconds).
-   * Will be applied after each parameter change
+   * @description Delay before starting the animation (in milliseconds)
    * @default 0
    */
   delay?: number
@@ -36,7 +35,7 @@ export type SmartTickerProps = {
    */
   iterations?: Iterations
   /**
-   * @description The content will be repeated during scrolling
+   * @description Determines if the content will repeated one by one during scrolling animation
    * @default true
    */
   infiniteScrollView?: boolean
