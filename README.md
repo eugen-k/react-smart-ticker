@@ -65,13 +65,10 @@ Then in your .jsx or .tsx file use it as a simple React component:
 import { SmartTicker, SmartTickerDraggable } from 'react-smart-ticker'
 
 const App = () => (
-  <SmartTicker>
-    Some text
-  </SmartTicker>
-
-  <SmartTickerDraggable>
-    Some draggable text
-  </SmartTickerDraggable>
+  <>
+    <SmartTicker>Some text</SmartTicker>
+    <SmartTickerDraggable>Some draggable text</SmartTickerDraggable>
+  </>
 )
 
 export default App
