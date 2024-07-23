@@ -93,7 +93,10 @@ export type SmartTickerProps = {
 export type Directions = 'left' | 'right' | 'top' | 'bottom'
 export type Iterations = 'infinite' | number
 
-export type SmartTickerDraggableProps = Omit<SmartTickerProps, 'pauseOnClick' | 'playOnClick'> & {
+export type SmartTickerDraggableProps = Omit<
+  SmartTickerProps,
+  'pauseOnClick' | 'playOnClick' | 'disableSelect'
+> & {
   delayBack?: number
 }
 
