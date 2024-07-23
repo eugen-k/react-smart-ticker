@@ -1,0 +1,24 @@
+.ticker {
+  display: flex;
+  flex-wrap: nowrap;
+  position: relative;
+  text-size-adjust: none;
+}
+
+.drag-wrapper {
+  display: flex;
+  position: relative;
+  cursor: grab;
+  flex-wrap: nowrap;
+  //text-size-adjust: none;
+  touch-action: none;
+  -webkit-touch-action: none;
+
+  &.dragging {
+    cursor: grabbing;
+  }
+
+  &.off {
+    cursor: unset;
+  }
+}

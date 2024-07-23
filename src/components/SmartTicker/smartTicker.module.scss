@@ -1,0 +1,35 @@
+/* ststic styles that shouldn't change */
+
+.ticker {
+  display: flex;
+  flex-wrap: nowrap;
+  position: relative;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  text-size-adjust: none;
+  overflow: hidden;
+}
+
+@keyframes scrollx {
+  0% {
+    transform: translateX(var(--stage0));
+  }
+  50% {
+    transform: translateX(var(--stage50));
+  }
+  100% {
+    transform: translateX(var(--stage100));
+  }
+}
+
+@keyframes scrolly {
+  0% {
+    transform: translateY(var(--stage0));
+  }
+  50% {
+    transform: translateY(var(--stage50));
+  }
+  100% {
+    transform: translateY(var(--stage100));
+  }
+}
