@@ -22,7 +22,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "dev": "rollup -c -w",
-    "build": "rm -rf dist && yarn run build:js && yarn build:types && yarn unlink && yarn link",
+    "build": "rm -rf dist && yarn run build:js && yarn build:types",
     "build:js": "rollup -c",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "test-watch": "jest --watch",
