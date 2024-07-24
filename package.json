@@ -22,7 +22,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "dev": "rollup -c -w",
-    "build": "rm -rf dist && yarn run build:js && yarn build:types && yarn unlink && yarn link",
+    "build": "rm -rf dist && yarn run build:js && yarn build:types",
     "build:js": "rollup -c",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "test-watch": "jest --watch",
@@ -39,7 +39,7 @@
     "@rollup/plugin-typescript": "^11.1.6",
     "@testing-library/dom": "^10.1.0",
     "@testing-library/jest-dom": "^6.4.6",
-    "@testing-library/reac  t": "^16.0.0",
+    "@testing-library/react": "^16.0.0",
     "@types/jest": "^29.5.12",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
@@ -83,7 +83,8 @@
     "dist/**/*"
   ],
   "resolutions": {
-    "string-width": "4.2.3"
+    "string-width": "4.2.3",
+    "wrap-ansi": "7.0.0"
   },
   "types": "dist/index.d.ts"
 }

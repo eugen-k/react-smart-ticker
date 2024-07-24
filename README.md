@@ -24,7 +24,8 @@ Can be draggable
 - has backward animation
 - can have a delay before animating back to the start position
 
-== IMPORTANT == For complex elements (e.g. images) is recommended to use **SmartTicker** as browsers are performing [better](https://developer.mozilla.org/en-US/docs/Web/Performance/CSS_JavaScript_animation_performance) using CSS-based animation.
+> [!IMPORTANT]
+> For complex elements (e.g. images) is recommended to use **SmartTicker** as browsers are performing [better](https://developer.mozilla.org/en-US/docs/Web/Performance/CSS_JavaScript_animation_performance) using CSS-based animation.
 
 ## Installation
 
@@ -64,13 +65,10 @@ Then in your .jsx or .tsx file use it as a simple React component:
 import { SmartTicker, SmartTickerDraggable } from 'react-smart-ticker'
 
 const App = () => (
-  <SmartTicker>
-    Some text
-  </SmartTicker>
-
-  <SmartTickerDraggable>
-    Some draggable text
-  </SmartTickerDraggable>
+  <>
+    <SmartTicker>Some text</SmartTicker>
+    <SmartTickerDraggable>Some draggable text</SmartTickerDraggable>
+  </>
 )
 
 export default App
@@ -85,7 +83,7 @@ export default App
 | `multiLine`          | `number`                                       | No       | 0            | Determines the maximum amount of lines within a text content. Sets direction to "top"                                                                             |
 | `speed`              | `number`                                       | No       | 60           | Scrolling speed in pixels per second                                                                                                                              |
 | `delay`              | `number`                                       | No       | 0            | Delay before starting the animation (in milliseconds)                                                                                                             |
-| `delayBack`          | `number`                                       | No       | 0            | == **SmartTickerDraggable** only == Delay before returning to a start position (in milliseconds)                                                                  |
+| ⚠️ `delayBack`       | `number`                                       | No       | 0            | Delay before returning to a start position (in milliseconds) **⚠️ _SmartTickerDraggable_ prop only**                                                              |
 | `iterations`         | `number` \| `"infinite"`                       | No       | `"infinite"` | Amount of animation iterations second                                                                                                                             |
 | `infiniteScrollView` | `boolean`                                      | No       | `true`       | Determines if the content will repeated one by one during scrolling animation                                                                                     |
 | `autoFill`           | `boolean`                                      | No       | `false`      | Flag to determine if ticker content should be copied and fill in all the container's space                                                                        |
@@ -93,10 +91,10 @@ export default App
 | `rtl`                | `boolean`                                      | No       | `false`      | Aligns text content to the right. The default direction of animation will be switched to 'right'                                                                  |
 | `pauseOnHover`       | `boolean`                                      | No       | `false`      | Pause animation on hover                                                                                                                                          |
 | `playOnHover`        | `boolean`                                      | No       | `false`      | Play animation on hover                                                                                                                                           |
-| `pauseOnClick`       | `boolean`                                      | No       | `false`      | == **SmartTicker** only == Pause animation on click                                                                                                               |
-| `playOnClick`        | `boolean`                                      | No       | `false`      | == **SmartTicker** only == Play animation on click                                                                                                                |
+| ⚠️ `pauseOnClick`    | `boolean`                                      | No       | `false`      | Pause animation on click **⚠️ _SmartTicker_ prop only**                                                                                                           |
+| ⚠️ `playOnClick`     | `boolean`                                      | No       | `false`      | Play animation on click **⚠️ _SmartTicker_ prop only**                                                                                                            |
 | `recalcDeps`         | `[]`                                           | No       | `[]`         | Array of dependencies that trigger recalculation of the component                                                                                                 |
-| `disableSelect`      | `boolean`                                      | No       | `false`      | == **SmartTicker** only == Controls the possibility of a user to select text in a ticker. Useful in mobile devices when the playOnClick param is _enabled_        |
+| ⚠️ `disableSelect`   | `boolean`                                      | No       | `false`      | Controls the possibility of a user to select text in a ticker. Useful in mobile devices when the playOnClick param is _enabled_ **⚠️ _SmartTicker_ prop only**    |
 | `style`              | `CSSProperties`                                | No       | `null`       | Ticker component custom CSS styles                                                                                                                                |
 | `containerStyle`     | `CSSProperties`                                | No       | `null`       | Ticker container component custom CSS styles                                                                                                                      |
 
