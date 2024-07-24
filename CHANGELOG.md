@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.1](https://github.com/eugen-k/react-smart-ticker/compare/v1.0.0...v1.0.1) (2024-07-24)
+
+
+### Bug Fixes
+
+* GH env key name ([ca321c4](https://github.com/eugen-k/react-smart-ticker/commit/ca321c4787bbc6d6bd9afa22e479d51851daf409))
+* GH release action ([b4510d2](https://github.com/eugen-k/react-smart-ticker/commit/b4510d23ae84f5385c1fe65fef2796320e38ad31))
+
+
+### Miscellaneous Chores
+
+* release 1.0.1 ([d509538](https://github.com/eugen-k/react-smart-ticker/commit/d5095381d669d0b499fdedc09f06b65ae5b984d1))
+
 ## 1.0.0 (2024-07-24)
 
 
