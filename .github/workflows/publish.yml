@@ -20,6 +20,9 @@ jobs:
       - name: Install dependencies with Yarn
         run: yarn install
 
+      - name: Build
+        run: yarn build
+
       - name: Publish to npm
         run: yarn publish
         env:
