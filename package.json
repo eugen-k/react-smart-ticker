@@ -83,7 +83,8 @@
     "dist/**/*"
   ],
   "resolutions": {
-    "string-width": "4.2.3"
+    "string-width": "4.2.3",
+    "wrap-ansi": "7.0.0"
   },
   "types": "dist/index.d.ts"
 }
