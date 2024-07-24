@@ -79,8 +79,17 @@
     "react-dom": ">=16.8.0"
   },
   "dependencies": {},
+  "exports": {
+    "./SmartTicker": {
+      "import": "./dist/SmartTicker.esm.js"
+    },
+    "./SmartTickerDraggable": {
+      "import": "./dist/SmartTickerDraggable.esm.js"
+    }
+  },
   "files": [
-    "dist/**/*"
+    "dist",
+    "README.md"
   ],
   "resolutions": {
     "string-width": "4.2.3",
