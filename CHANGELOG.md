@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4](https://github.com/eugen-k/react-smart-ticker/compare/v1.0.3...v1.0.4) (2024-07-24)
+
+
+### Bug Fixes
+
+* upgrade node version ([3b7829e](https://github.com/eugen-k/react-smart-ticker/commit/3b7829e4eb9a5ee2c70c4a4cab7827a9562df3e2))
+
 ## [1.0.3](https://github.com/eugen-k/react-smart-ticker/compare/v1.0.2...v1.0.3) (2024-07-24)
 
 
