@@ -3,11 +3,12 @@ name: Release Please
 on:
   push:
     branches:
-      - main
+      - 'release/*'
 
 jobs:
   release:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -18,7 +19,16 @@ jobs:
           node-version: '16'
 
       - name: Install dependencies
-        run: npm install
+        run: yarn install
+
+      - name: Run lint
+        run: yarn lint
+
+      - name: Run tests
+        run: yarn test
+
+      - name: Build the project
+        run: yarn build
 
       - name: Release Please
         uses: google-github-actions/release-please-action@v3
