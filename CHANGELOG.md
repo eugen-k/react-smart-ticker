@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.10](https://github.com/eugen-k/react-smart-ticker/compare/v1.0.9...v1.0.10) (2024-07-25)
+
+
+### Bug Fixes
+
+* typings ([92f3c55](https://github.com/eugen-k/react-smart-ticker/commit/92f3c5570d0b901e328f091553cedc231eb04d03))
+
 ## [1.0.9](https://github.com/eugen-k/react-smart-ticker/compare/v1.0.8...v1.0.9) (2024-07-25)
 
 
