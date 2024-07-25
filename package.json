@@ -99,10 +99,10 @@
   "typesVersions": {
     "*": {
       "SmartTicker": [
-        "dist/components/SmartTicker.d.ts"
+        "dist/components/SmartTicker/index.d.ts"
       ],
       "SmartTickerDraggable": [
-        "dist/components/SmartTickerDraggable.d.ts"
+        "dist/components/SmartTickerDraggable/index.d.ts"
       ],
       "*": [
         "dist/index.d.ts"
