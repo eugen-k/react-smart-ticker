@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.9](https://github.com/eugen-k/react-smart-ticker/compare/v1.0.8...v1.0.9) (2024-07-25)
+
+
+### Bug Fixes
+
+* do not preserve modules ([4391402](https://github.com/eugen-k/react-smart-ticker/commit/439140247feaa9362bdd9af1260e89ce1d31e81c))
+
 ## [1.0.8](https://github.com/eugen-k/react-smart-ticker/compare/v1.0.7...v1.0.8) (2024-07-25)
 
 
