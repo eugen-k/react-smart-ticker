@@ -19,7 +19,6 @@ export default [
         format: 'cjs',
         sourcemap: true,
         entryFileNames: '[name].js',
-        preserveModules: true,
         preserveModulesRoot: 'src'
       },
       {
@@ -27,12 +26,11 @@ export default [
         format: 'esm',
         sourcemap: true,
         entryFileNames: '[name].esm.js',
-        preserveModules: true,
         preserveModulesRoot: 'src'
       }
     ],
     plugins: [
-      resolve(),
+      resolve({ browser: true }),
       commonjs(),
       typescript({ tsconfig: './tsconfig.json' }),
       postcss({
