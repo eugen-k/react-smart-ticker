@@ -85,15 +85,18 @@
   "exports": {
     ".": {
       "import": "./dist/index.esm.js",
-      "require": "./dist/index.js"
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     },
     "./SmartTicker": {
       "import": "./dist/components/SmartTicker.esm.js",
-      "require": "./dist/components/SmartTicker.js"
+      "require": "./dist/components/SmartTicker.js",
+      "types": "./dist/components/SmartTicker.d.ts"
     },
     "./SmartTickerDraggable": {
       "import": "./dist/components/SmartTickerDraggable.esm.js",
-      "require": "./dist/components/SmartTickerDraggable.js"
+      "require": "./dist/components/SmartTickerDraggable.js",
+      "types": "./dist/components/SmartTickerDraggable.d.ts"
     }
   },
   "typesVersions": {
