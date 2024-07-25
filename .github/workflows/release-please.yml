@@ -31,6 +31,8 @@ jobs:
         run: yarn build
 
       - name: Release
+        env:
+          GH_TOKEN: ${{ secrets.ACTION_TOKEN }}
         uses: google-github-actions/release-please-action@v4
         id: release
         with:
