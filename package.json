@@ -79,12 +79,34 @@
     "react-dom": ">=16.8.0"
   },
   "dependencies": {},
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
   "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js"
+    },
     "./SmartTicker": {
-      "import": "./dist/SmartTicker.esm.js"
+      "import": "./dist/components/SmartTicker.esm.js",
+      "require": "./dist/components/SmartTicker.js"
     },
     "./SmartTickerDraggable": {
-      "import": "./dist/SmartTickerDraggable.esm.js"
+      "import": "./dist/components/SmartTickerDraggable.esm.js",
+      "require": "./dist/components/SmartTickerDraggable.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "SmartTicker": [
+        "dist/components/SmartTicker.d.ts"
+      ],
+      "SmartTickerDraggable": [
+        "dist/components/SmartTickerDraggable.d.ts"
+      ],
+      "*": [
+        "dist/index.d.ts"
+      ]
     }
   },
   "files": [
@@ -94,6 +116,5 @@
   "resolutions": {
     "string-width": "4.2.3",
     "wrap-ansi": "7.0.0"
-  },
-  "types": "dist/index.d.ts"
+  }
 }
