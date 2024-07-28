@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.14](https://github.com/eugen-k/react-smart-ticker/compare/v1.0.13...v1.0.14) (2024-07-28)
+
+
+### Bug Fixes
+
+* alignPosition ([8eda3e4](https://github.com/eugen-k/react-smart-ticker/commit/8eda3e48542660f927a7ef2599035a0489ae7e1b))
+
 ## [1.0.13](https://github.com/eugen-k/react-smart-ticker/compare/v1.0.12...v1.0.13) (2024-07-28)
 
 
