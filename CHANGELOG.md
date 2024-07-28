@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.13](https://github.com/eugen-k/react-smart-ticker/compare/v1.0.12...v1.0.13) (2024-07-28)
+
+
+### Bug Fixes
+
+* calling onAnimationEnd ([7e28f1f](https://github.com/eugen-k/react-smart-ticker/commit/7e28f1fb7802c88ddc3c05c2e88c2db50e32ea80))
+
 ## [1.0.12](https://github.com/eugen-k/react-smart-ticker/compare/v1.0.11...v1.0.12) (2024-07-25)
 
 
