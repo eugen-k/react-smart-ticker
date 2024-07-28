@@ -84,7 +84,7 @@ export class Animation {
             requestAnimationFrame(() => {
               this.wrapperEl!.current!.style[this.sideX] = wrapperX - tickerWidth + 'px'
             })
-            return
+            break
           }
 
           if (this.wrapperEl && wrapperX <= -tickerWidth) {
@@ -92,7 +92,7 @@ export class Animation {
             requestAnimationFrame(() => {
               this.wrapperEl!.current!.style[this.sideX] = wrapperX + tickerWidth + 'px'
             })
-            return
+            break
           }
           break
         }
@@ -105,7 +105,7 @@ export class Animation {
             requestAnimationFrame(() => {
               this.wrapperEl!.current!.style.top = wrapperTop - tickerHeight + 'px'
             })
-            return
+            break
           }
 
           if (this.wrapperEl && wrapperTop <= -tickerHeight) {
@@ -113,10 +113,18 @@ export class Animation {
             requestAnimationFrame(() => {
               this.wrapperEl!.current!.style.top = wrapperTop + tickerHeight + 'px'
             })
-            return
+            break
           }
           break
         }
+      }
+
+      if (this.iterations !== 'infinite' && this.iterationCounter >= this.iterations) {
+        if (typeof this.onAnimationEnd === 'function') {
+          this.onAnimationEnd()
+        }
+
+        this.isInnerPaused = false
       }
     } else if (!this.isDragging) {
       const minPos: { [Property in typeof this.axis]: { [Property in Directions]?: number } } = {
