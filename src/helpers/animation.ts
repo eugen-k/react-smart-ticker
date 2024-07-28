@@ -169,8 +169,8 @@ export class Animation {
               }, this.delay)
             } else {
               this.isInnerPaused = false
-              if (this.onAnimationEnd) {
-                this.onAnimationEnd
+              if (typeof this.onAnimationEnd === 'function') {
+                this.onAnimationEnd()
               }
             }
           }

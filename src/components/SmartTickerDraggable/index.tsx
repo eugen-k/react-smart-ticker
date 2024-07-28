@@ -60,8 +60,10 @@ export const SmartTickerDraggable: FC<SmartTickerDraggableProps> = ({
     recalcDeps
   })
 
-  const canBeAnimated =
-    (!isChildFit || (!smart && isChildFit && infiniteScrollView)) && isCalculated
+  const canBeAnimated = useMemo(
+    () => (!isChildFit || (!smart && isChildFit && infiniteScrollView)) && isCalculated,
+    [isChildFit, smart, isChildFit, infiniteScrollView, isCalculated]
+  )
 
   const { onMouseDownHandler, onTouchStartHandler, onContainerHoverHandler, wrapperRef, isPaused } =
     useTickerAnimation({
