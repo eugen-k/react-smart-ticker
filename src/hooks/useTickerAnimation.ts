@@ -92,6 +92,7 @@ export const useTickerAnimation = ({
         iterations,
         onAnimationEnd: () => {
           setIsPaused(true)
+
           if (playOnHover) {
             animationRef.current.setCounter(0)
           }
