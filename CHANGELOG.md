@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.15](https://github.com/eugen-k/react-smart-ticker/compare/v1.0.14...v1.0.15) (2024-07-29)
+
+
+### Bug Fixes
+
+* back animation ([4037651](https://github.com/eugen-k/react-smart-ticker/commit/403765163ed1d74d3135cb4e6184bd3f368b7fdd))
+
 ## [1.0.14](https://github.com/eugen-k/react-smart-ticker/compare/v1.0.13...v1.0.14) (2024-07-28)
 
 
