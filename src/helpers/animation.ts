@@ -11,6 +11,7 @@ type InitParams = {
   delayBack: number
   direction: Directions
   infiniteScrollView: boolean
+  playOnHover: boolean
   rtl: boolean
   iterations: Iterations
   onAnimationEnd?: () => void
@@ -31,6 +32,7 @@ export class Animation {
   private isInnerPaused = false
   private isPaused = true
   private delay: number
+  private playOnHover: boolean = false
   private delayBack: number
   private iterations: Iterations
   private sideX: 'left' | 'right' = 'left'
@@ -50,10 +52,13 @@ export class Animation {
   }
 
   private animate() {
+    console.log('animate')
+
     this.prevTime = 0
 
     const _animate = (time: number) => {
       if (!this.prevTime) this.prevTime = time
+      console.log(this.isPaused)
 
       if (
         !this.isPaused &&
@@ -124,6 +129,7 @@ export class Animation {
           this.onAnimationEnd()
         }
 
+        // reset animation state
         this.isInnerPaused = false
       }
     } else if (!this.isDragging) {
@@ -161,7 +167,7 @@ export class Animation {
   }
 
   private restartLoop = () => {
-    requestAnimationFrame(() => {
+    const restart = () => {
       if (this.wrapperEl.current) {
         this.wrapperEl.current.style.transition = `${this.sideX} .2s linear, top .2s linear`
         this.wrapperEl.current.style[this.axis === 'x' ? this.sideX : 'top'] = 0 + 'px'
@@ -176,6 +182,7 @@ export class Animation {
                 this.animate()
               }, this.delay)
             } else {
+              // reset animation state
               this.isInnerPaused = false
               if (typeof this.onAnimationEnd === 'function') {
                 this.onAnimationEnd()
@@ -184,7 +191,16 @@ export class Animation {
           }
         }, 200)
       }
-    })
+    }
+
+    if (this.iterations === 'infinite' || this.iterationCounter < this.iterations) {
+      requestAnimationFrame(restart)
+    } else if (this.playOnHover) {
+      // reset animation state
+      this.isInnerPaused = false
+    } else {
+      requestAnimationFrame(restart)
+    }
   }
 
   pause() {
@@ -222,6 +238,7 @@ export class Animation {
     speed,
     infiniteScrollView,
     direction,
+    playOnHover,
     iterations,
     rtl,
     onAnimationEnd
@@ -240,6 +257,7 @@ export class Animation {
     this.containerRect = containerRect
     this.delay = delay
     this.delayBack = delayBack
+    this.playOnHover = playOnHover
 
     if (rtl) {
       this.sideX = 'right'
