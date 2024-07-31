@@ -1,6 +1,6 @@
 /// <reference
 
-import React from 'react'
+import React, { act } from 'react'
 import { render, screen } from '@testing-library/react'
 import { SmartTickerDraggable } from '.'
 import { fireEvent, waitFor } from '@testing-library/dom'
@@ -21,6 +21,10 @@ beforeAll(() => {
   Object.defineProperty(HTMLElement.prototype, 'getBoundingClientRect', {
     configurable: true,
     value: mockGetBoundingClientRect
+  })
+
+  Object.defineProperty(document, 'fonts', {
+    value: { ready: Promise.resolve({}) }
   })
 })
 
@@ -48,42 +52,60 @@ afterEach(() => {
 })
 
 describe('SmartTickerDraggable', () => {
-  test('renders with 1 element while smart mode is on', () => {
-    render(<SmartTickerDraggable>Test</SmartTickerDraggable>)
+  test('renders with 1 element while smart mode is on', async () => {
+    await act(async () => {
+      render(<SmartTickerDraggable>Test</SmartTickerDraggable>)
+    })
+
     const elements = screen.getAllByText(/Test/i)
     expect(elements).toHaveLength(1)
   })
 
-  test('renders with 3 element while smart mode is off', () => {
-    render(<SmartTickerDraggable smart={false}>Test</SmartTickerDraggable>)
+  test('renders with 3 element while smart mode is off', async () => {
+    await act(async () => {
+      render(<SmartTickerDraggable smart={false}>Test</SmartTickerDraggable>)
+    })
+
     const elements = screen.getAllByText(/Test/i)
     expect(elements).toHaveLength(3)
   })
 
-  test('renders with 1 element while infiniteScrollView param is off', () => {
-    render(<SmartTickerDraggable infiniteScrollView={false}>Test</SmartTickerDraggable>)
+  test('renders with 1 element while infiniteScrollView param is off', async () => {
+    await act(async () => {
+      render(<SmartTickerDraggable infiniteScrollView={false}>Test</SmartTickerDraggable>)
+    })
+
     const elements = screen.getAllByText(/Test/i)
     expect(elements).toHaveLength(1)
   })
 
-  test('renders with 3 element while infiniteScrollView param is on and smart mode is off', () => {
-    render(<SmartTickerDraggable smart={false}>Test</SmartTickerDraggable>)
+  test('renders with 3 element while infiniteScrollView param is on and smart mode is off', async () => {
+    await act(async () => {
+      render(<SmartTickerDraggable smart={false}>Test</SmartTickerDraggable>)
+    })
+
     const elements = screen.getAllByText(/Test/i)
     expect(elements).toHaveLength(3)
   })
 
-  test('renders with 3 element while infiniteScrollView param is on and smart mode is off', () => {
-    render(<SmartTickerDraggable smart={false}>Test</SmartTickerDraggable>)
+  test('renders with 3 element while infiniteScrollView param is on and smart mode is off', async () => {
+    await act(async () => {
+      render(<SmartTickerDraggable smart={false}>Test</SmartTickerDraggable>)
+    })
+
     const elements = screen.getAllByText(/Test/i)
     expect(elements).toHaveLength(3)
   })
 
   test('starts the animation to the left', async () => {
-    render(
-      <SmartTickerDraggable smart={false} direction='left'>
-        Test
-      </SmartTickerDraggable>
-    )
+    await act(async () => {
+      render(
+        <SmartTickerDraggable smart={false} direction='left'>
+          Test
+        </SmartTickerDraggable>
+      )
+    })
+
     const wrapper = screen.getByTestId('ticker-wrapper')
 
     await new Promise((r) => setTimeout(r, 100))
@@ -92,11 +114,14 @@ describe('SmartTickerDraggable', () => {
   })
 
   test('starts the animation and pause on hover', async () => {
-    render(
-      <SmartTickerDraggable smart={false} pauseOnHover direction='left'>
-        Test
-      </SmartTickerDraggable>
-    )
+    await act(async () => {
+      render(
+        <SmartTickerDraggable smart={false} pauseOnHover direction='left'>
+          Test
+        </SmartTickerDraggable>
+      )
+    })
+
     const container = screen.getByTestId('ticker-container')
     const wrapper = screen.getByTestId('ticker-wrapper')
 
@@ -110,11 +135,14 @@ describe('SmartTickerDraggable', () => {
   })
 
   test('starts the animation to the right', async () => {
-    render(
-      <SmartTickerDraggable smart={false} direction='right'>
-        Test
-      </SmartTickerDraggable>
-    )
+    await act(async () => {
+      render(
+        <SmartTickerDraggable smart={false} direction='right'>
+          Test
+        </SmartTickerDraggable>
+      )
+    })
+
     const wrapper = screen.getByTestId('ticker-wrapper')
 
     await new Promise((r) => setTimeout(r, 100))
@@ -137,11 +165,14 @@ describe('SmartTickerDraggable', () => {
         height: 199
       })
 
-    render(
-      <SmartTickerDraggable smart={false} direction='right' infiniteScrollView={true}>
-        Test
-      </SmartTickerDraggable>
-    )
+    await act(async () => {
+      render(
+        <SmartTickerDraggable smart={false} direction='right' infiniteScrollView={true}>
+          Test
+        </SmartTickerDraggable>
+      )
+    })
+
     const wrapper = screen.getByTestId('ticker-wrapper')
 
     await new Promise((r) => setTimeout(r, 500))
@@ -164,11 +195,14 @@ describe('SmartTickerDraggable', () => {
         height: 250
       })
 
-    render(
-      <SmartTickerDraggable smart={false} direction='right' infiniteScrollView={false}>
-        Test
-      </SmartTickerDraggable>
-    )
+    await act(async () => {
+      render(
+        <SmartTickerDraggable smart={false} direction='right' infiniteScrollView={false}>
+          Test
+        </SmartTickerDraggable>
+      )
+    })
+
     const wrapper = screen.getByTestId('ticker-wrapper')
 
     await new Promise((r) => setTimeout(r, 500))
@@ -177,11 +211,14 @@ describe('SmartTickerDraggable', () => {
   })
 
   test('changes position on touchMove to the right', async () => {
-    render(
-      <SmartTickerDraggable smart={false} direction='right'>
-        Test
-      </SmartTickerDraggable>
-    )
+    await act(async () => {
+      render(
+        <SmartTickerDraggable smart={false} direction='right'>
+          Test
+        </SmartTickerDraggable>
+      )
+    })
+
     const wrapper = screen.getByTestId('ticker-wrapper')
 
     await new Promise((r) => setTimeout(r, 100))
@@ -198,11 +235,14 @@ describe('SmartTickerDraggable', () => {
   })
 
   test('changes position on mouseMove to the right', async () => {
-    render(
-      <SmartTickerDraggable smart={false} direction='right'>
-        Test
-      </SmartTickerDraggable>
-    )
+    await act(async () => {
+      render(
+        <SmartTickerDraggable smart={false} direction='right'>
+          Test
+        </SmartTickerDraggable>
+      )
+    })
+
     const wrapper = screen.getByTestId('ticker-wrapper')
 
     await new Promise((r) => setTimeout(r, 100))
@@ -219,11 +259,14 @@ describe('SmartTickerDraggable', () => {
   })
 
   test('changes position on mouseMove to the right when infiniteScrollView param is off', async () => {
-    render(
-      <SmartTickerDraggable smart={false} direction='right' infiniteScrollView={false}>
-        Test
-      </SmartTickerDraggable>
-    )
+    await act(async () => {
+      render(
+        <SmartTickerDraggable smart={false} direction='right' infiniteScrollView={false}>
+          Test
+        </SmartTickerDraggable>
+      )
+    })
+
     const wrapper = screen.getByTestId('ticker-wrapper')
 
     await new Promise((r) => setTimeout(r, 200))
@@ -245,11 +288,14 @@ describe('SmartTickerDraggable', () => {
   })
 
   test('changes position on mouseMove to the left', async () => {
-    render(
-      <SmartTickerDraggable smart={false} direction='left'>
-        Test
-      </SmartTickerDraggable>
-    )
+    await act(async () => {
+      render(
+        <SmartTickerDraggable smart={false} direction='left'>
+          Test
+        </SmartTickerDraggable>
+      )
+    })
+
     const wrapper = screen.getByTestId('ticker-wrapper')
 
     await new Promise((r) => setTimeout(r, 100))
@@ -266,11 +312,14 @@ describe('SmartTickerDraggable', () => {
   })
 
   test('changes position on mouseMove to the top', async () => {
-    render(
-      <SmartTickerDraggable smart={false} direction='top'>
-        Test
-      </SmartTickerDraggable>
-    )
+    await act(async () => {
+      render(
+        <SmartTickerDraggable smart={false} direction='top'>
+          Test
+        </SmartTickerDraggable>
+      )
+    })
+
     const wrapper = screen.getByTestId('ticker-wrapper')
 
     await new Promise((r) => setTimeout(r, 100))
@@ -287,11 +336,14 @@ describe('SmartTickerDraggable', () => {
   })
 
   test('changes position on mouseMove to the bottom', async () => {
-    render(
-      <SmartTickerDraggable smart={false} direction='bottom'>
-        Test
-      </SmartTickerDraggable>
-    )
+    await act(async () => {
+      render(
+        <SmartTickerDraggable smart={false} direction='bottom'>
+          Test
+        </SmartTickerDraggable>
+      )
+    })
+
     const wrapper = screen.getByTestId('ticker-wrapper')
 
     await new Promise((r) => setTimeout(r, 100))
@@ -325,11 +377,13 @@ describe('SmartTickerDraggable', () => {
         height: 50
       })
 
-    render(
-      <SmartTickerDraggable smart={false} direction='left'>
-        Test
-      </SmartTickerDraggable>
-    )
+    await act(async () => {
+      render(
+        <SmartTickerDraggable smart={false} direction='left'>
+          Test
+        </SmartTickerDraggable>
+      )
+    })
 
     const wrapper = screen.getByTestId('ticker-wrapper')
 

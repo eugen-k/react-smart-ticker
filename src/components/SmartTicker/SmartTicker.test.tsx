@@ -1,6 +1,6 @@
 /// <reference
 
-import React, { RefObject } from 'react'
+import React, { act, RefObject } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import SmartTicker from '.'
 
@@ -20,6 +20,10 @@ beforeAll(() => {
   Object.defineProperty(HTMLElement.prototype, 'getBoundingClientRect', {
     configurable: true,
     value: mockGetBoundingClientRect
+  })
+
+  Object.defineProperty(document, 'fonts', {
+    value: { ready: Promise.resolve({}) }
   })
 })
 
@@ -51,35 +55,44 @@ afterAll(() => {
 })
 
 describe('SmartTicker', () => {
-  test('renders with 1 element with the smart mode on (by default)', () => {
-    render(<SmartTicker>Test</SmartTicker>)
+  test('renders with 1 element with the smart mode on (by default)', async () => {
+    await act(async () => {
+      render(<SmartTicker>Test</SmartTicker>)
+    })
     const elements = screen.getAllByText(/Test/i)
 
     expect(elements).toHaveLength(1)
   })
 
-  test('renders with 2 elements when the smart mode is off', () => {
-    render(<SmartTicker smart={false}>Test</SmartTicker>)
+  test('renders with 2 elements when the smart mode is off', async () => {
+    await act(async () => {
+      render(<SmartTicker smart={false}>Test</SmartTicker>)
+    })
     const elements = screen.getAllByText(/Test/i)
     expect(elements).toHaveLength(2)
   })
 
-  test('renders with 1 elements when the smart mode is off and infiniteScrollView option is off', () => {
-    render(
-      <SmartTicker smart={false} infiniteScrollView={false}>
-        Test
-      </SmartTicker>
-    )
+  test('renders with 1 elements when the smart mode is off and infiniteScrollView option is off', async () => {
+    await act(async () => {
+      render(
+        <SmartTicker smart={false} infiniteScrollView={false}>
+          Test
+        </SmartTicker>
+      )
+    })
+
     const elements = screen.getAllByText(/Test/i)
     expect(elements).toHaveLength(1)
   })
 
   test('renders with autofill option', async () => {
-    render(
-      <SmartTicker autoFill>
-        <div style={{ width: '50px' }}>Test</div>
-      </SmartTicker>
-    )
+    await act(async () => {
+      render(
+        <SmartTicker autoFill>
+          <div style={{ width: '50px' }}>Test</div>
+        </SmartTicker>
+      )
+    })
 
     const element1 = screen.getByTestId('ticker-1')
     const element2 = screen.getByTestId('ticker-2')
@@ -89,19 +102,21 @@ describe('SmartTicker', () => {
   })
 
   test('renders with all the CSS options', async () => {
-    render(
-      <SmartTicker
-        delay={200}
-        speed={100}
-        iterations={3}
-        rtl
-        disableSelect
-        style={{ lineHeight: 20, width: '200px' }}
-        containerStyle={{ width: '200px' }}
-      >
-        Test
-      </SmartTicker>
-    )
+    await act(async () => {
+      render(
+        <SmartTicker
+          delay={200}
+          speed={100}
+          iterations={3}
+          rtl
+          disableSelect
+          style={{ lineHeight: 20, width: '200px' }}
+          containerStyle={{ width: '200px' }}
+        >
+          Test
+        </SmartTicker>
+      )
+    })
 
     const ticker = screen.getByTestId('ticker-1')
     const container = screen.getByTestId('ticker-container')
@@ -115,11 +130,13 @@ describe('SmartTicker', () => {
   })
 
   test('renders in y-axis and fill it with text', async () => {
-    render(
-      <SmartTicker direction='top' autoFill>
-        <div style={{ height: '50px' }}>Test</div>
-      </SmartTicker>
-    )
+    await act(async () => {
+      render(
+        <SmartTicker direction='top' autoFill>
+          <div style={{ height: '50px' }}>Test</div>
+        </SmartTicker>
+      )
+    })
 
     const ticker = screen.getByTestId('ticker-1')
     const container = screen.getByTestId('ticker-container')
@@ -144,11 +161,13 @@ describe('SmartTicker', () => {
         height: 50
       })
 
-    render(
-      <SmartTicker isText playOnHover>
-        <div style={{ width: '250px' }}>Test</div>
-      </SmartTicker>
-    )
+    await act(async () => {
+      render(
+        <SmartTicker isText playOnHover>
+          <div style={{ width: '250px' }}>Test</div>
+        </SmartTicker>
+      )
+    })
 
     const ticker = screen.getByTestId('ticker-1')
 
@@ -174,11 +193,13 @@ describe('SmartTicker', () => {
         height: 20
       })
 
-    render(
-      <SmartTicker isText multiLine={3} playOnHover>
-        <div style={{ width: '250px' }}>Test</div>
-      </SmartTicker>
-    )
+    await act(async () => {
+      render(
+        <SmartTicker isText multiLine={3} playOnHover>
+          <div style={{ width: '250px' }}>Test</div>
+        </SmartTicker>
+      )
+    })
 
     const ticker = screen.getByTestId('ticker-1')
     const container = screen.getByTestId('ticker-container')
@@ -206,11 +227,13 @@ describe('SmartTicker', () => {
         height: 50
       })
 
-    render(
-      <SmartTicker isText multiLine={3} playOnHover>
-        <div style={{ width: '250px' }}>Test</div>
-      </SmartTicker>
-    )
+    await act(async () => {
+      render(
+        <SmartTicker isText multiLine={3} playOnHover>
+          <div style={{ width: '250px' }}>Test</div>
+        </SmartTicker>
+      )
+    })
 
     const ticker = screen.getByTestId('ticker-1')
     const container = screen.getByTestId('ticker-container')
@@ -218,12 +241,14 @@ describe('SmartTicker', () => {
     expect(ticker.style.minHeight).toEqual(container.style.maxHeight)
   })
 
-  test('start playing and then pause on hover', () => {
-    render(
-      <SmartTicker smart={false} pauseOnHover>
-        Test
-      </SmartTicker>
-    )
+  test('start playing and then pause on hover', async () => {
+    await act(async () => {
+      render(
+        <SmartTicker smart={false} pauseOnHover>
+          Test
+        </SmartTicker>
+      )
+    })
     const element = screen.getByTestId('ticker-1')
     const container = screen.getByTestId('ticker-container')
     expect(element).toHaveStyle({ 'animation-play-state': 'running' })
@@ -231,12 +256,15 @@ describe('SmartTicker', () => {
     expect(element).toHaveStyle({ 'animation-play-state': 'paused' })
   })
 
-  test('start playing and then pause on click', () => {
-    render(
-      <SmartTicker smart={false} pauseOnClick>
-        Test
-      </SmartTicker>
-    )
+  test('start playing and then pause on click', async () => {
+    await act(async () => {
+      render(
+        <SmartTicker smart={false} pauseOnClick>
+          Test
+        </SmartTicker>
+      )
+    })
+
     const element = screen.getByTestId('ticker-1')
     const container = screen.getByTestId('ticker-container')
     expect(element).toHaveStyle({ 'animation-play-state': 'running' })
@@ -244,12 +272,15 @@ describe('SmartTicker', () => {
     expect(element).toHaveStyle({ 'animation-play-state': 'paused' })
   })
 
-  test('plays on click', () => {
-    render(
-      <SmartTicker smart={false} playOnClick>
-        Test
-      </SmartTicker>
-    )
+  test('plays on click', async () => {
+    await act(async () => {
+      render(
+        <SmartTicker smart={false} playOnClick>
+          Test
+        </SmartTicker>
+      )
+    })
+
     const element = screen.getByTestId('ticker-1')
     const container = screen.getByTestId('ticker-container')
     expect(element).toHaveStyle({ 'animation-play-state': 'paused' })
@@ -259,12 +290,15 @@ describe('SmartTicker', () => {
     expect(element).toHaveStyle({ 'animation-play-state': 'paused' })
   })
 
-  test('plays on touch', () => {
-    render(
-      <SmartTicker smart={false} playOnClick>
-        Test
-      </SmartTicker>
-    )
+  test('plays on touch', async () => {
+    await act(async () => {
+      render(
+        <SmartTicker smart={false} playOnClick>
+          Test
+        </SmartTicker>
+      )
+    })
+
     const element = screen.getByTestId('ticker-1')
     const container = screen.getByTestId('ticker-container')
     expect(element).toHaveStyle({ 'animation-play-state': 'paused' })
@@ -274,12 +308,15 @@ describe('SmartTicker', () => {
     expect(element).toHaveStyle({ 'animation-play-state': 'paused' })
   })
 
-  test('plays on hover', () => {
-    render(
-      <SmartTicker smart={false} playOnHover>
-        Test
-      </SmartTicker>
-    )
+  test('plays on hover', async () => {
+    await act(async () => {
+      render(
+        <SmartTicker smart={false} playOnHover>
+          Test
+        </SmartTicker>
+      )
+    })
+
     const element = screen.getByTestId('ticker-1')
     const container = screen.getByTestId('ticker-container')
     expect(element).toHaveStyle({ 'animation-play-state': 'paused' })
@@ -311,12 +348,14 @@ describe('SmartTicker', () => {
       useSmartCheck: jest.fn(() => defaultHookMock)
     }))
 
-    import('.').then((SmartTicker) => {
-      render(
-        <SmartTicker.default smart={false} playOnHover>
-          Test
-        </SmartTicker.default>
-      )
+    import('.').then(async (SmartTicker) => {
+      await act(async () => {
+        render(
+          <SmartTicker.default smart={false} playOnHover>
+            Test
+          </SmartTicker.default>
+        )
+      })
     })
   })
 })
