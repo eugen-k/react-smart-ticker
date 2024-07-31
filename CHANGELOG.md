@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/eugen-k/react-smart-ticker/compare/v1.0.15...v1.1.0) (2024-07-31)
+
+
+### Features
+
+* add waitForFonts param ([8aee987](https://github.com/eugen-k/react-smart-ticker/commit/8aee987af42a1d3942a7ccede0f878780469cb05))
+
+
+### Bug Fixes
+
+* wrap render with act ([832ca86](https://github.com/eugen-k/react-smart-ticker/commit/832ca8628fb9a552548c08b516960219c8248e1f))
+
 ## [1.0.15](https://github.com/eugen-k/react-smart-ticker/compare/v1.0.14...v1.0.15) (2024-07-29)
 
 
