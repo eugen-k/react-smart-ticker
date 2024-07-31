@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/eugen-k/react-smart-ticker/compare/v1.1.0...v1.1.1) (2024-07-31)
+
+
+### Bug Fixes
+
+* running hook order ([4b16fb9](https://github.com/eugen-k/react-smart-ticker/commit/4b16fb9b5dba4e6523fc52cada011beb8de108cc))
+
 ## [1.1.0](https://github.com/eugen-k/react-smart-ticker/compare/v1.0.15...v1.1.0) (2024-07-31)
 
 
