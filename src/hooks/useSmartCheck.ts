@@ -48,17 +48,11 @@ export const useSmartCheck: UseSmartCheckHook = ({
 
   useLayoutEffect(() => {
     if (waitForFonts) {
+      // will be resolved immediately if mounted inside a ready document
       document.fonts.ready.then(() => {
         smartCheck()
       })
     } else {
-      smartCheck()
-    }
-  }, [])
-
-  useLayoutEffect(() => {
-    // prevent reset while the initial component loading
-    if (isCalculated) {
       smartCheck()
     }
   }, [recalc])
