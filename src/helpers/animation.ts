@@ -11,6 +11,7 @@ type InitParams = {
   delayBack: number
   direction: Directions
   infiniteScrollView: boolean
+  playOnHover: boolean
   rtl: boolean
   iterations: Iterations
   onAnimationEnd?: () => void
@@ -31,6 +32,7 @@ export class Animation {
   private isInnerPaused = false
   private isPaused = true
   private delay: number
+  private playOnHover: boolean = false
   private delayBack: number
   private iterations: Iterations
   private sideX: 'left' | 'right' = 'left'
@@ -84,7 +86,7 @@ export class Animation {
             requestAnimationFrame(() => {
               this.wrapperEl!.current!.style[this.sideX] = wrapperX - tickerWidth + 'px'
             })
-            return
+            break
           }
 
           if (this.wrapperEl && wrapperX <= -tickerWidth) {
@@ -92,7 +94,7 @@ export class Animation {
             requestAnimationFrame(() => {
               this.wrapperEl!.current!.style[this.sideX] = wrapperX + tickerWidth + 'px'
             })
-            return
+            break
           }
           break
         }
@@ -105,7 +107,7 @@ export class Animation {
             requestAnimationFrame(() => {
               this.wrapperEl!.current!.style.top = wrapperTop - tickerHeight + 'px'
             })
-            return
+            break
           }
 
           if (this.wrapperEl && wrapperTop <= -tickerHeight) {
@@ -113,10 +115,19 @@ export class Animation {
             requestAnimationFrame(() => {
               this.wrapperEl!.current!.style.top = wrapperTop + tickerHeight + 'px'
             })
-            return
+            break
           }
           break
         }
+      }
+
+      if (this.iterations !== 'infinite' && this.iterationCounter >= this.iterations) {
+        if (typeof this.onAnimationEnd === 'function') {
+          this.onAnimationEnd()
+        }
+
+        // reset animation state
+        this.isInnerPaused = false
       }
     } else if (!this.isDragging) {
       const minPos: { [Property in typeof this.axis]: { [Property in Directions]?: number } } = {
@@ -153,7 +164,7 @@ export class Animation {
   }
 
   private restartLoop = () => {
-    requestAnimationFrame(() => {
+    const restart = () => {
       if (this.wrapperEl.current) {
         this.wrapperEl.current.style.transition = `${this.sideX} .2s linear, top .2s linear`
         this.wrapperEl.current.style[this.axis === 'x' ? this.sideX : 'top'] = 0 + 'px'
@@ -168,15 +179,25 @@ export class Animation {
                 this.animate()
               }, this.delay)
             } else {
+              // reset animation state
               this.isInnerPaused = false
-              if (this.onAnimationEnd) {
-                this.onAnimationEnd
+              if (typeof this.onAnimationEnd === 'function') {
+                this.onAnimationEnd()
               }
             }
           }
         }, 200)
       }
-    })
+    }
+
+    if (this.iterations === 'infinite' || this.iterationCounter < this.iterations) {
+      requestAnimationFrame(restart)
+    } else if (this.playOnHover) {
+      // reset animation state
+      this.isInnerPaused = false
+    } else {
+      requestAnimationFrame(restart)
+    }
   }
 
   pause() {
@@ -214,6 +235,7 @@ export class Animation {
     speed,
     infiniteScrollView,
     direction,
+    playOnHover,
     iterations,
     rtl,
     onAnimationEnd
@@ -232,6 +254,7 @@ export class Animation {
     this.containerRect = containerRect
     this.delay = delay
     this.delayBack = delayBack
+    this.playOnHover = playOnHover
 
     if (rtl) {
       this.sideX = 'right'

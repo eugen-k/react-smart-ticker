@@ -1,4 +1,4 @@
-import { MouseEvent, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { MouseEvent, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Animation } from '../helpers/animation'
 import { Directions, ElRect, Iterations } from '../types/smartTickerTypes'
 
@@ -56,6 +56,7 @@ export const useTickerAnimation = ({
   const wrapperRef = useRef<HTMLDivElement>(null)
 
   const [isPaused, setIsPaused] = useState(true)
+  const [isHovered, setIsHovered] = useState(false)
 
   let dragListener: EventListener
   let touchListener: EventListener
@@ -88,12 +89,15 @@ export const useTickerAnimation = ({
         delay,
         delayBack,
         direction,
+        playOnHover,
         rtl,
         iterations,
         onAnimationEnd: () => {
-          setIsPaused(true)
-          if (playOnHover) {
-            animationRef.current.setCounter(0)
+          if (isHovered && playOnHover) {
+            animationRef.current.pause()
+            // isPaused state will be updated while onMouseOut
+          } else {
+            setIsPaused(true)
           }
         }
       })
@@ -115,16 +119,10 @@ export const useTickerAnimation = ({
   useLayoutEffect(() => {
     if (isPaused) {
       animationRef.current.pause()
-      // reset iterationCounter if the playOnClick or playOnHover options are true, to play the animation again once clicked/hovered
-      if (
-        iterations !== 'infinite' &&
-        animationRef.current.getCounter() >= iterations &&
-        playOnHover
-      ) {
-        animationRef.current.setCounter(0)
-      }
-      // move back to the start position if the playOnHover options are true
+      // reset iterationCounter if playOnHover option is true, to play the animation again once hovered
       if (playOnHover) {
+        animationRef.current.setCounter(0)
+        // move back to the start position if the playOnHover options are true
         animationRef.current.backToStartPosition()
       }
     } else if (canBeAnimated) {
@@ -132,27 +130,30 @@ export const useTickerAnimation = ({
     }
   }, [isPaused])
 
-  const onContainerHoverHandler = (hovered: boolean) => {
+  const onContainerHoverHandler = useCallback(
+    (hovered: boolean) => {
+      setIsHovered(hovered)
+    },
+    [playOnHover, pauseOnHover]
+  )
+
+  useEffect(() => {
     if (playOnHover) {
-      if (hovered) {
+      if (isHovered) {
         setIsPaused(false)
-        //animationRef.current.play()
       } else {
         setIsPaused(true)
-        //animationRef.current.pause()
       }
     }
 
     if (pauseOnHover) {
-      if (hovered) {
+      if (isHovered) {
         setIsPaused(true)
-        //animationRef.current.pause()
       } else {
         setIsPaused(false)
-        //animationRef.current.play()
       }
     }
-  }
+  }, [isHovered])
 
   const onMoveHandler = (e: React.MouseEvent<Element> | React.TouchEvent<Element>) => {
     let oldX = (e as React.MouseEvent).clientX ?? (e as React.TouchEvent).touches[0]?.clientX

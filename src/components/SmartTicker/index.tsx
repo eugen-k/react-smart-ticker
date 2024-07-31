@@ -61,6 +61,7 @@ const SmartTicker: FC<SmartTickerProps> = ({
   children,
   smart = true,
   isText = true,
+  waitForFonts = isText ? true : false,
   multiLine = 0,
   infiniteScrollView = true,
   autoFill = false,
@@ -100,7 +101,16 @@ const SmartTicker: FC<SmartTickerProps> = ({
     amountToFill,
     isCalculated,
     reset
-  } = useSmartCheck({ axis, autoFill, multiLine, infiniteScrollView, speed, smart, children })
+  } = useSmartCheck({
+    axis,
+    autoFill,
+    multiLine,
+    infiniteScrollView,
+    speed,
+    smart,
+    waitForFonts,
+    children
+  })
 
   const [isPaused, setIsPaused] = useState(true)
 

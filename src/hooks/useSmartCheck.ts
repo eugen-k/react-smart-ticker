@@ -9,6 +9,7 @@ type Props = {
   infiniteScrollView: boolean
   autoFill: boolean
   speed: number
+  waitForFonts: boolean
   recalcDeps?: unknown[]
 }
 
@@ -31,6 +32,7 @@ export const useSmartCheck: UseSmartCheckHook = ({
   speed,
   children,
   smart,
+  waitForFonts,
   recalcDeps = []
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -45,7 +47,14 @@ export const useSmartCheck: UseSmartCheckHook = ({
   const [recalc, setRecalc] = useState(new Date().getTime())
 
   useLayoutEffect(() => {
-    smartCheck()
+    if (waitForFonts) {
+      // will be resolved immediately if mounted inside a ready document
+      document.fonts.ready.then(() => {
+        smartCheck()
+      })
+    } else {
+      smartCheck()
+    }
   }, [recalc])
 
   useEffect(() => {

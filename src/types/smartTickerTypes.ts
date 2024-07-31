@@ -15,6 +15,11 @@ export type SmartTickerProps = {
    */
   isText?: boolean
   /**
+   * @description Should the calculation be started only when fonts are loaded
+   * @default true
+   */
+  waitForFonts?: boolean
+  /**
    * @description Determines the maximum amount of lines within a text content
    * @default 0
    */

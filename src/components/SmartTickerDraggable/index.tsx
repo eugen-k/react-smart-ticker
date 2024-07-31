@@ -1,4 +1,4 @@
-import React, { FC, Fragment, useMemo, useState } from 'react'
+import React, { FC, Fragment, useCallback, useMemo, useState } from 'react'
 import styles from './smartTickerDraggable.module.scss'
 import { useSmartCheck } from '../../hooks/useSmartCheck'
 import { SmartTickerDraggableProps } from '../../types/smartTickerTypes'
@@ -28,6 +28,7 @@ export const SmartTickerDraggable: FC<SmartTickerDraggableProps> = ({
   style,
   containerStyle,
   isText = true,
+  waitForFonts = isText ? true : false,
   multiLine = 0,
   infiniteScrollView = true
 }) => {
@@ -54,14 +55,17 @@ export const SmartTickerDraggable: FC<SmartTickerDraggableProps> = ({
     multiLine,
     infiniteScrollView,
     smart,
+    waitForFonts,
     axis,
     autoFill,
     speed,
     recalcDeps
   })
 
-  const canBeAnimated =
-    (!isChildFit || (!smart && isChildFit && infiniteScrollView)) && isCalculated
+  const canBeAnimated = useMemo(
+    () => (!isChildFit || (!smart && isChildFit && infiniteScrollView)) && isCalculated,
+    [isChildFit, smart, isChildFit, infiniteScrollView, isCalculated]
+  )
 
   const { onMouseDownHandler, onTouchStartHandler, onContainerHoverHandler, wrapperRef, isPaused } =
     useTickerAnimation({
@@ -83,9 +87,9 @@ export const SmartTickerDraggable: FC<SmartTickerDraggableProps> = ({
       onMouseUp: onMouseUpInnerHandler
     })
 
-  const onResizeHandler = () => {
+  const onResizeHandler = useCallback(() => {
     smartCheckReset()
-  }
+  }, [])
 
   function onMouseDownInnerHandler() {
     wrapperRef!.current?.classList.add(styles['dragging'])

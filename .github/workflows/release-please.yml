@@ -31,7 +31,8 @@ jobs:
         run: yarn build
 
       - name: Release
-        uses: google-github-actions/release-please-action@v4
-        id: release
+        uses: googleapis/release-please-action@v4
         with:
+          token: ${{ secrets.ACTION_TOKEN }}
           release-type: node
+        id: release
