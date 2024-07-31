@@ -52,13 +52,10 @@ export class Animation {
   }
 
   private animate() {
-    console.log('animate')
-
     this.prevTime = 0
 
     const _animate = (time: number) => {
       if (!this.prevTime) this.prevTime = time
-      console.log(this.isPaused)
 
       if (
         !this.isPaused &&

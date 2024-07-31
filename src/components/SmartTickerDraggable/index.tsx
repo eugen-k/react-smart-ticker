@@ -28,6 +28,7 @@ export const SmartTickerDraggable: FC<SmartTickerDraggableProps> = ({
   style,
   containerStyle,
   isText = true,
+  waitForFonts = isText ? true : false,
   multiLine = 0,
   infiniteScrollView = true
 }) => {
@@ -54,6 +55,7 @@ export const SmartTickerDraggable: FC<SmartTickerDraggableProps> = ({
     multiLine,
     infiniteScrollView,
     smart,
+    waitForFonts,
     axis,
     autoFill,
     speed,

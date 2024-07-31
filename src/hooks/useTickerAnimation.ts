@@ -132,7 +132,6 @@ export const useTickerAnimation = ({
 
   const onContainerHoverHandler = useCallback(
     (hovered: boolean) => {
-      console.log('onContainerHoverHandler', hovered)
       setIsHovered(hovered)
     },
     [playOnHover, pauseOnHover]
