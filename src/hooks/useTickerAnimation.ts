@@ -114,7 +114,17 @@ export const useTickerAnimation = ({
       animationRef.current.backToStartPosition()
       setIsPaused(true)
     }
-  }, [isCalculated])
+  }, [
+    isCalculated,
+    delay,
+    delayBack,
+    iterations,
+    infiniteScrollView,
+    direction,
+    rtl,
+    pauseOnHover,
+    playOnHover
+  ])
 
   useLayoutEffect(() => {
     if (isPaused) {
