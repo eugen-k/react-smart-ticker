@@ -30,7 +30,8 @@ export const SmartTickerDraggable: FC<SmartTickerDraggableProps> = ({
   isText = true,
   waitForFonts = isText ? true : false,
   multiLine = 0,
-  infiniteScrollView = true
+  infiniteScrollView = true,
+  disableSelect = false
 }) => {
   smart = smart && !autoFill
   pauseOnHover = playOnHover ? false : pauseOnHover
@@ -148,6 +149,7 @@ export const SmartTickerDraggable: FC<SmartTickerDraggableProps> = ({
     textSizeAdjust: 'none',
     justifyItems: 'flex-start',
     flexDirection: axis === 'x' ? 'row' : 'column',
+    userSelect: disableSelect ? 'none' : 'unset',
     ...(axis === 'x' && { minWidth: tickerRect.width, whiteSpace: 'nowrap' }),
     ...(axis === 'y' && {
       minHeight: tickerRect.height,
