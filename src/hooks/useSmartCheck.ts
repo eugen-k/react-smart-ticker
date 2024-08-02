@@ -62,7 +62,7 @@ export const useSmartCheck: UseSmartCheckHook = ({
     if (isCalculated) {
       reset()
     }
-  }, [children, smart, autoFill, multiLine, speed, ...recalcDeps])
+  }, [children, smart, autoFill, multiLine, speed, axis, ...recalcDeps])
 
   const reset = () => {
     setAmountToFill(1)
