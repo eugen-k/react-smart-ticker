@@ -158,9 +158,6 @@ export class Animation {
         newPos < minPos[this.axis][this.direction]! ||
         newPos > maxPos[this.axis][this.direction]!
       ) {
-        console.log('minPos', this.direction, minPos[this.axis][this.direction])
-        console.log('maxPos', this.direction, maxPos[this.axis][this.direction])
-
         this.iterationCounter++
         this.isInnerPaused = true
 
