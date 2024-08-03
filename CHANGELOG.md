@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.4](https://github.com/eugen-k/react-smart-ticker/compare/v1.1.3...v1.1.4) (2024-08-03)
+
+
+### Bug Fixes
+
+* minor animation fixes ([194d9f7](https://github.com/eugen-k/react-smart-ticker/commit/194d9f711ec9d2cdd890e89206a08c56bc8a9198))
+
 ## [1.1.3](https://github.com/eugen-k/react-smart-ticker/compare/v1.1.2...v1.1.3) (2024-08-02)
 
 
