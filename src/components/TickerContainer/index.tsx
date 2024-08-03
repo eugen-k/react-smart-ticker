@@ -5,13 +5,13 @@ import { debounce } from '../../helpers/debounce'
 
 type Props = {
   direction: SmartTickerProps['direction']
-  rtl: boolean
   containerRef: RefObject<HTMLDivElement>
   containerRect: { width: number; height: number }
   children: ReactNode
   onHoverHandler?: (hoverState: boolean) => void
   onClickHandler?: (clickState: boolean) => void
   draggable?: boolean
+  infiniteScrollView: boolean
   onResizeHandler?: () => void
   style?: CSSProperties
 }
@@ -21,14 +21,14 @@ export const TickerContainer: FC<Props> = ({
   containerRef,
   containerRect,
   direction,
-  rtl,
   onHoverHandler,
   onClickHandler,
-  draggable,
+  draggable = false,
+  infiniteScrollView,
   onResizeHandler,
   style
 }) => {
-  const axis = direction === 'left' || direction === 'right' ? 'x' : 'y'
+  // const axis = direction === 'left' || direction === 'right' ? 'x' : 'y'
 
   useEffect(() => {
     if (typeof onResizeHandler === 'function') {
@@ -43,7 +43,7 @@ export const TickerContainer: FC<Props> = ({
 
   const containerStyles: CSSProperties = {
     ...style,
-    display: 'inline-flex',
+    display: 'flex',
     position: 'relative',
     flexWrap: 'nowrap',
     flexDirection: direction === 'left' || direction === 'right' ? 'row' : 'column',
@@ -55,8 +55,8 @@ export const TickerContainer: FC<Props> = ({
       maxHeight: containerRect.height
     }),
     ...(draggable && { touchAction: 'none' }),
-    ...(rtl &&
-      axis === 'x' && {
+    ...((direction === 'right' || direction === 'bottom') &&
+      !(infiniteScrollView && draggable) && {
         justifyContent: 'flex-end'
       })
   }

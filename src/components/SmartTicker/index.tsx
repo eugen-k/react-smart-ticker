@@ -43,9 +43,9 @@ const CSSDirectionParams = {
       '--stage100': '-100%'
     },
     bottom: {
-      '--stage0': '-100%',
-      '--stage50': '-50%',
-      '--stage100': '0%'
+      '--stage0': '0%',
+      '--stage50': '50%',
+      '--stage100': '100%'
     }
   }
 }
@@ -102,7 +102,7 @@ const SmartTicker: FC<SmartTickerProps> = ({
     isCalculated,
     reset
   } = useSmartCheck({
-    axis,
+    direction,
     autoFill,
     multiLine,
     infiniteScrollView,
@@ -125,7 +125,7 @@ const SmartTicker: FC<SmartTickerProps> = ({
 
   useLayoutEffect(() => {
     setIsPaused((smart && isChildFit) || playOnDemand)
-  }, [isCalculated])
+  }, [isCalculated, playOnDemand])
 
   useEffect(() => {
     if (isPaused && playOnDemand && isCalculated) {
@@ -183,7 +183,7 @@ const SmartTicker: FC<SmartTickerProps> = ({
 
   const isRowEllipses = useMemo(() => {
     if (
-      axis === 'x' &&
+      (direction === 'left' || (direction === 'right' && rtl)) &&
       isText &&
       !multiLine &&
       isPaused &&
@@ -200,7 +200,7 @@ const SmartTicker: FC<SmartTickerProps> = ({
 
   const isColumnEllipses = useMemo(() => {
     if (
-      axis === 'y' &&
+      direction === 'top' &&
       isText &&
       isPaused &&
       playOnDemand &&
@@ -264,8 +264,8 @@ const SmartTicker: FC<SmartTickerProps> = ({
       containerRef={containerRef}
       containerRect={containerRect}
       onResizeHandler={onResizeHandler}
-      rtl={rtl}
       direction={direction}
+      infiniteScrollView={infiniteScrollView}
       style={containerStyle}
       {...((playOnHover || pauseOnHover) && { onHoverHandler: onHoverHandler })}
       {...((playOnClick || pauseOnClick) && { onClickHandler: onClickHandler })}
