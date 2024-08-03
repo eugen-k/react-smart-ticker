@@ -14,6 +14,7 @@ type InitParams = {
   playOnHover: boolean
   rtl: boolean
   iterations: Iterations
+  play: boolean
   onAnimationEnd?: () => void
 }
 
@@ -157,9 +158,6 @@ export class Animation {
         newPos < minPos[this.axis][this.direction]! ||
         newPos > maxPos[this.axis][this.direction]!
       ) {
-        console.log('minPos', this.direction, minPos[this.axis][this.direction])
-        console.log('maxPos', this.direction, maxPos[this.axis][this.direction])
-
         this.iterationCounter++
         this.isInnerPaused = true
 
@@ -244,6 +242,7 @@ export class Animation {
     direction,
     playOnHover,
     iterations,
+    play,
     onAnimationEnd
   }: InitParams) {
     this.tickerEl = tickerEl
@@ -251,7 +250,7 @@ export class Animation {
     this.axis = direction === 'left' || direction === 'right' ? 'x' : 'y'
     this.sign = direction === 'left' || direction === 'top' ? -1 : 1
     this.speed = speed
-    this.isPaused = true
+    this.isPaused = play
     this.iterations = iterations
     this.onAnimationEnd = onAnimationEnd || null
     this.iterationCounter = 0
