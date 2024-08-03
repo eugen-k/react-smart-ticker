@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.5](https://github.com/eugen-k/react-smart-ticker/compare/v1.1.4...v1.1.5) (2024-08-03)
+
+
+### Bug Fixes
+
+* animation init play status ([5472dc1](https://github.com/eugen-k/react-smart-ticker/commit/5472dc19cfa735be7ee0b6b0d4c3c14af6026aa9))
+* tests ([029cc84](https://github.com/eugen-k/react-smart-ticker/commit/029cc84f96ece5978a3659fd7299e489ac5589ab))
+
 ## [1.1.4](https://github.com/eugen-k/react-smart-ticker/compare/v1.1.3...v1.1.4) (2024-08-03)
 
 
