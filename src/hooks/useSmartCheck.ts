@@ -1,10 +1,10 @@
 import { ReactNode, useRef, useState, useLayoutEffect, RefObject, useEffect } from 'react'
-import { ElRect } from '../types/smartTickerTypes'
+import { Directions, ElRect } from '../types/smartTickerTypes'
 
 type Props = {
   children: ReactNode
   smart: boolean
-  axis: 'x' | 'y'
+  direction: Directions
   multiLine: number
   infiniteScrollView: boolean
   autoFill: boolean
@@ -26,7 +26,7 @@ type UseSmartCheckHook = (args: Props) => {
 }
 
 export const useSmartCheck: UseSmartCheckHook = ({
-  axis,
+  direction,
   multiLine,
   autoFill,
   speed,
@@ -35,6 +35,8 @@ export const useSmartCheck: UseSmartCheckHook = ({
   waitForFonts,
   recalcDeps = []
 }) => {
+  const axis = direction === 'left' || direction === 'right' ? 'x' : 'y'
+
   const containerRef = useRef<HTMLDivElement>(null)
   const tickerRef = useRef<HTMLDivElement>(null)
 
@@ -62,7 +64,7 @@ export const useSmartCheck: UseSmartCheckHook = ({
     if (isCalculated) {
       reset()
     }
-  }, [children, smart, autoFill, multiLine, speed, axis, ...recalcDeps])
+  }, [children, smart, autoFill, multiLine, speed, direction, ...recalcDeps])
 
   const reset = () => {
     setAmountToFill(1)
@@ -87,13 +89,15 @@ export const useSmartCheck: UseSmartCheckHook = ({
         height: cHeight,
         maxWidth: cMaxWidth,
         maxHeight: cMaxHeight,
-        overflow: cOverflow
+        overflow: cOverflow,
+        display: cDisplay
       } = containerRef.current.style
 
       tickerRef.current.style.minWidth = 'auto'
       tickerRef.current.style.minHeight = 'auto'
       containerRef.current.style.maxWidth = '100%'
       containerRef.current.style.maxHeight = '100%'
+      containerRef.current.style.display = 'inline-flex'
 
       if (autoFill) {
         containerRef.current.style.height = '100%'
@@ -131,17 +135,14 @@ export const useSmartCheck: UseSmartCheckHook = ({
       containerRef.current.style.height = cHeight
       containerRef.current.style.width = cWidth
       containerRef.current.style.overflow = cOverflow
+      containerRef.current.style.display = cDisplay
       tickerRef.current.style.overflow = mOverflow
       tickerRef.current.style.whiteSpace = mWhiteSpace
 
-      let _isChildFit: boolean = true
+      let _isChildFit: boolean = autoFill ? false : true
 
       switch (axis) {
         case 'x': {
-          if (Math.round(tickerWidth) > Math.round(containerWidth)) {
-            _isChildFit = false
-          }
-
           const amountToFill =
             autoFill && Math.round(tickerWidth) !== Math.round(containerWidth)
               ? Math.ceil(containerWidth / tickerWidth)
@@ -149,9 +150,15 @@ export const useSmartCheck: UseSmartCheckHook = ({
 
           setAmountToFill(amountToFill)
 
+          if (Math.round(tickerWidth) > Math.round(containerWidth) || autoFill) {
+            _isChildFit = false
+          }
+
           if (amountToFill > 1) {
             tickerWidth = tickerWidth * amountToFill
-          } else if (_isChildFit) {
+          }
+
+          if (_isChildFit) {
             tickerWidth = containerWidth
           }
 
@@ -159,22 +166,27 @@ export const useSmartCheck: UseSmartCheckHook = ({
           break
         }
         case 'y': {
-          if (Math.round(tickerHeight) > Math.round(containerHeight)) {
-            _isChildFit = false
-          }
-
           const amountToFill =
             autoFill && Math.round(tickerHeight) !== Math.round(containerHeight)
               ? Math.ceil(containerHeight / tickerHeight)
               : 1
+
           setAmountToFill(amountToFill)
 
-          if (_isChildFit && amountToFill === 1) {
-            containerHeight = Math.min(tickerHeight, containerHeight)
+          if (Math.round(tickerHeight) > Math.round(containerHeight) || autoFill) {
+            _isChildFit = false
           }
+
+          /* if (_isChildFit && amountToFill === 1) {
+            containerHeight = Math.min(tickerHeight, containerHeight)
+            } */
 
           if (amountToFill > 1) {
             tickerHeight = tickerHeight * amountToFill
+          }
+
+          if (_isChildFit) {
+            tickerHeight = containerHeight
           }
 
           setDuration(Math.max(tickerHeight, containerHeight) / speed)
