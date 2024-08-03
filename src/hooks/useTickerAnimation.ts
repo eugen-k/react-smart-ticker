@@ -69,7 +69,6 @@ export const useTickerAnimation = ({
       removeEventListener('mouseup', mouseUpHandler)
       removeEventListener('touchmove', touchListener)
       removeEventListener('touchend', touchEndHandler)
-      animationRef.current.pause()
       animationRef.current.backToStartPosition()
     }
   }, [])
@@ -92,6 +91,7 @@ export const useTickerAnimation = ({
         playOnHover,
         rtl,
         iterations,
+        play: isPaused,
         onAnimationEnd: () => {
           if (isHovered && playOnHover) {
             animationRef.current.pause()
@@ -109,9 +109,6 @@ export const useTickerAnimation = ({
 
     return () => {
       !!timeoutId && clearTimeout(timeoutId)
-      animationRef.current.pause()
-      animationRef.current.setCounter(0)
-      animationRef.current.backToStartPosition()
       setIsPaused(true)
     }
   }, [
@@ -132,7 +129,7 @@ export const useTickerAnimation = ({
       // reset iterationCounter if playOnHover option is true, to play the animation again once hovered
       if (playOnHover) {
         animationRef.current.setCounter(0)
-        // move back to the start position if the playOnHover options are true
+        // move back to the start position if the playOnHover option is true
         animationRef.current.backToStartPosition()
       }
     } else if (canBeAnimated) {
