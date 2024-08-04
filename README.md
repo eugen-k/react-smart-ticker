@@ -1,13 +1,15 @@
 # React Smart Ticker
 
-React component that optionally transforms child elements into a (optionally draggable) ticker/marquee. By default, treats its content as text and then tries to fit it into the container. If it doesn't, truncates it and runs a "ticker-like" animation for one-line content or vertical animation for text in columns. A fitted text leaves as it is.
+Automatically displays text as a scrolling ticker/marquee when it overflows the container.
 
 ## Features
 
-- Zero dependency
-- Supports RTL
-- Highly customisable
+- Multiline support
 - Can be used as a ticker/marquee for any element e.g. text, images, HTML blocks
+- Optionally draggable
+- Supports RTL
+- Highly customizable
+- Zero dependency
 
 ## _SmartTicker_ and _SmartTickerDraggable_ component differences
 
