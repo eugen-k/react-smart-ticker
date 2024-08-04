@@ -125,6 +125,7 @@ const SmartTicker: FC<SmartTickerProps> = ({
 
   useLayoutEffect(() => {
     setIsPaused((smart && isChildFit) || playOnDemand)
+    resetPosition()
   }, [isCalculated, playOnDemand])
 
   useEffect(() => {
@@ -201,7 +202,6 @@ const SmartTicker: FC<SmartTickerProps> = ({
   const isColumnEllipses = useMemo(() => {
     if (
       direction === 'top' &&
-      isText &&
       isPaused &&
       playOnDemand &&
       multiLine &&

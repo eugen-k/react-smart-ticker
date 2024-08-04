@@ -31,6 +31,7 @@ export const useSmartCheck: UseSmartCheckHook = ({
   autoFill,
   speed,
   children,
+  infiniteScrollView,
   smart,
   waitForFonts,
   recalcDeps = []
@@ -64,7 +65,7 @@ export const useSmartCheck: UseSmartCheckHook = ({
     if (isCalculated) {
       reset()
     }
-  }, [children, smart, autoFill, multiLine, speed, direction, ...recalcDeps])
+  }, [children, smart, autoFill, multiLine, speed, direction, infiniteScrollView, ...recalcDeps])
 
   const reset = () => {
     setAmountToFill(1)
@@ -78,8 +79,11 @@ export const useSmartCheck: UseSmartCheckHook = ({
     if (tickerRef.current && containerRef.current) {
       // save the original styles
       const {
+        display: mDisplay,
         minWidth: mMinWidth,
         minHeight: mMinHeight,
+        maxWidth: mMaxWidth,
+        maxHeight: mMaxHeight,
         whiteSpace: mWhiteSpace,
         overflow: mOverflow
       } = tickerRef.current.style
@@ -93,8 +97,11 @@ export const useSmartCheck: UseSmartCheckHook = ({
         display: cDisplay
       } = containerRef.current.style
 
+      tickerRef.current.style.display = 'inline-flex'
       tickerRef.current.style.minWidth = 'auto'
       tickerRef.current.style.minHeight = 'auto'
+      tickerRef.current.style.maxWidth = 'auto'
+      tickerRef.current.style.maxHeight = 'auto'
       containerRef.current.style.maxWidth = '100%'
       containerRef.current.style.maxHeight = '100%'
       containerRef.current.style.display = 'inline-flex'
@@ -128,8 +135,11 @@ export const useSmartCheck: UseSmartCheckHook = ({
       }
 
       // reset styles back
+      tickerRef.current.style.display = mDisplay
       tickerRef.current.style.minWidth = mMinWidth
       tickerRef.current.style.minHeight = mMinHeight
+      tickerRef.current.style.maxWidth = mMaxWidth
+      tickerRef.current.style.maxHeight = mMaxHeight
       containerRef.current.style.maxWidth = cMaxWidth
       containerRef.current.style.maxHeight = cMaxHeight
       containerRef.current.style.height = cHeight
