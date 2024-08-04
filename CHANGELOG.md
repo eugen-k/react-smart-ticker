@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.7](https://github.com/eugen-k/react-smart-ticker/compare/v1.1.6...v1.1.7) (2024-08-04)
+
+
+### Bug Fixes
+
+* smartCheck styles overwriting ([c1697a4](https://github.com/eugen-k/react-smart-ticker/commit/c1697a4f9eb3b4c81caf1c3704deb063943cbce7))
+
 ## [1.1.6](https://github.com/eugen-k/react-smart-ticker/compare/v1.1.5...v1.1.6) (2024-08-04)
 
 
