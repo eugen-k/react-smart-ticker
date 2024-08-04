@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.6](https://github.com/eugen-k/react-smart-ticker/compare/v1.1.5...v1.1.6) (2024-08-04)
+
+
+### Bug Fixes
+
+* smartCheck logic ([6fff00f](https://github.com/eugen-k/react-smart-ticker/commit/6fff00fbea321b8df2e6e3f3c96c60e5ded4c504))
+
 ## [1.1.5](https://github.com/eugen-k/react-smart-ticker/compare/v1.1.4...v1.1.5) (2024-08-03)
 
 
