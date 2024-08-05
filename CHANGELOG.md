@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.8](https://github.com/eugen-k/react-smart-ticker/compare/v1.1.7...v1.1.8) (2024-08-05)
+
+
+### Bug Fixes
+
+* dragging event ([825202b](https://github.com/eugen-k/react-smart-ticker/commit/825202be958414bb2fb6c862807dff1f07c658c2))
+
 ## [1.1.7](https://github.com/eugen-k/react-smart-ticker/compare/v1.1.6...v1.1.7) (2024-08-04)
 
 
