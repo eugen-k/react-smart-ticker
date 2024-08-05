@@ -2,6 +2,10 @@
 
 Automatically displays text as a scrolling ticker/marquee when it overflows the container.
 
+![](https://github.com/eugen-k/react-smart-ticker-demo/blob/main/src/assets/gif/multi-line.gif)
+![](https://github.com/eugen-k/react-smart-ticker-demo/blob/main/src/assets/gif/1-line.gif)
+![](https://github.com/eugen-k/react-smart-ticker-demo/blob/main/src/assets/gif/html.gif)
+
 ## Features
 
 - Multiline support
