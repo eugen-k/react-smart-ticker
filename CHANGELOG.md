@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/eugen-k/react-smart-ticker/compare/v1.1.8...v1.2.0) (2024-08-05)
+
+
+### Features
+
+* add demo link ([334f22d](https://github.com/eugen-k/react-smart-ticker/commit/334f22dcb508b2d2e3ae222136f2130cd130f326))
+
 ## [1.1.8](https://github.com/eugen-k/react-smart-ticker/compare/v1.1.7...v1.1.8) (2024-08-05)
 
 
