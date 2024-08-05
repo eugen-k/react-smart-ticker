@@ -258,12 +258,20 @@ export const useTickerAnimation = ({
   const onTouchStartHandler = (e: React.TouchEvent) => {
     animationRef.current.setIsDragging(true)
 
+    if (typeof onMouseDown === 'function') {
+      onMouseDown()
+    }
+
     addEventListener('touchmove', (touchListener = onMoveHandler(e) as EventListener))
 
     addEventListener(
       'touchend',
       (touchEndHandler = () => {
         animationRef.current.setIsDragging(false)
+
+        if (typeof onMouseUp === 'function') {
+          onMouseUp()
+        }
 
         if (
           canBeAnimated &&
