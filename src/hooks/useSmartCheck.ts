@@ -102,9 +102,9 @@ export const useSmartCheck: UseSmartCheckHook = ({
       tickerRef.current.style.minHeight = 'auto'
       tickerRef.current.style.maxWidth = 'unset'
       tickerRef.current.style.maxHeight = 'unset'
+      containerRef.current.style.display = 'inline-flex'
       containerRef.current.style.maxWidth = '100%'
       containerRef.current.style.maxHeight = '100%'
-      containerRef.current.style.display = 'inline-flex'
 
       if (autoFill) {
         containerRef.current.style.height = '100%'

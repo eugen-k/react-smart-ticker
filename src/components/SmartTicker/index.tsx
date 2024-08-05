@@ -84,7 +84,6 @@ const SmartTicker: FC<SmartTickerProps> = ({
   smart = smart && !autoFill
   pauseOnClick = playOnClick || playOnHover ? false : pauseOnClick
   pauseOnHover = playOnClick || playOnHover ? false : pauseOnHover
-  delay = playOnClick || playOnHover ? 0 : delay
 
   const playOnDemand = playOnClick || playOnHover
   direction = multiLine ? 'top' : direction
@@ -226,6 +225,7 @@ const SmartTicker: FC<SmartTickerProps> = ({
     animationDelay: (delay || 0) / 1000 + 's',
     userSelect: disableSelect ? 'none' : 'unset',
     WebkitUserSelect: disableSelect ? 'none' : 'unset',
+    WebkitTouchCallout: disableSelect ? 'none' : 'unset',
     ...(!infiniteScrollView && {
       ['--stage0' as string]: CSSDirectionParams[direction]['--stage0'],
       ['--stage50' as string]: CSSDirectionParams[direction]['--stage50'],

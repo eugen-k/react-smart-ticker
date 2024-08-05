@@ -158,6 +158,8 @@ export const SmartTickerDraggable: FC<SmartTickerDraggableProps> = ({
     justifyItems: 'flex-start',
     flexDirection: axis === 'x' ? 'row' : 'column',
     userSelect: disableSelect ? 'none' : 'unset',
+    WebkitUserSelect: disableSelect ? 'none' : 'unset',
+    WebkitTouchCallout: disableSelect ? 'none' : 'unset',
     ...(axis === 'x' && { minWidth: tickerRect.width, whiteSpace: 'nowrap' }),
     ...(axis === 'y' && {
       minHeight: tickerRect.height,
