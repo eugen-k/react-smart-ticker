@@ -3,9 +3,9 @@
 Automatically displays text as a scrolling ticker/marquee when it overflows the container.
 
 <div>
-<img src="https://github.com/eugen-k/react-smart-ticker-demo/blob/main/src/assets/gif/1-line.gif" style="vertical-align: middle; alt="1-line" width="200" height="auto">
-<img src="https://github.com/eugen-k/react-smart-ticker-demo/blob/main/src/assets/gif/multi-line.gif" style="vertical-align: middle; alt="Multi-line" width="200" height="auto">
-<img src="https://github.com/eugen-k/react-smart-ticker-demo/blob/main/src/assets/gif/html.gif" style="vertical-align: middle; alt="HTML blocks ticker" width="200" height="auto">
+<img src="https://github.com/eugen-k/react-smart-ticker-demo/blob/main/src/assets/gif/1-line.gif" style="vertical-align: middle;" alt="1-line" width="200" height="auto">
+<img src="https://github.com/eugen-k/react-smart-ticker-demo/blob/main/src/assets/gif/multi-line.gif" style="vertical-align: middle;" alt="Multi-line" width="200" height="auto">
+<img src="https://github.com/eugen-k/react-smart-ticker-demo/blob/main/src/assets/gif/html.gif" style="vertical-align: middle;" alt="HTML blocks ticker" width="200" height="auto">
 </div>
 
 ## Demo
