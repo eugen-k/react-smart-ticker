@@ -131,6 +131,16 @@ const SmartTicker: FC<SmartTickerProps> = ({
     if (isPaused && playOnDemand && isCalculated) {
       resetPosition()
     }
+
+    if (isPaused) {
+      if (tickerRef.current) {
+        tickerRef.current.style.willChange = 'auto'
+      }
+    } else {
+      if (tickerRef.current) {
+        tickerRef.current.style.willChange = 'transform'
+      }
+    }
   }, [isPaused])
 
   const onResizeHandler = () => {

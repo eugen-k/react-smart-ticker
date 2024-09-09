@@ -125,6 +125,10 @@ export const useTickerAnimation = ({
 
   useLayoutEffect(() => {
     if (isPaused) {
+      if (wrapperRef.current) {
+        wrapperRef.current.style.willChange = 'auto'
+      }
+
       animationRef.current.pause()
       // reset iterationCounter if playOnHover option is true, to play the animation again once hovered
       if (playOnHover) {
@@ -133,6 +137,10 @@ export const useTickerAnimation = ({
         animationRef.current.backToStartPosition()
       }
     } else if (canBeAnimated) {
+      if (wrapperRef.current) {
+        wrapperRef.current.style.willChange = axis === 'x' ? 'left' : 'top'
+      }
+
       animationRef.current.play()
     }
   }, [isPaused])
@@ -229,6 +237,10 @@ export const useTickerAnimation = ({
 
     animationRef.current.setIsDragging(true)
 
+    if (wrapperRef.current) {
+      wrapperRef.current.style.willChange = axis === 'x' ? 'left' : 'top'
+    }
+
     addEventListener('mousemove', (dragListener = onMoveHandler(e) as EventListener))
 
     addEventListener(
@@ -236,6 +248,10 @@ export const useTickerAnimation = ({
       (mouseUpHandler = () => {
         if (typeof onMouseUp === 'function') {
           onMouseUp()
+        }
+
+        if (wrapperRef.current) {
+          wrapperRef.current.style.willChange = 'auto'
         }
 
         animationRef.current.setIsDragging(false)
@@ -262,6 +278,10 @@ export const useTickerAnimation = ({
       onMouseDown()
     }
 
+    if (wrapperRef.current) {
+      wrapperRef.current.style.willChange = axis === 'x' ? 'left' : 'top'
+    }
+
     addEventListener('touchmove', (touchListener = onMoveHandler(e) as EventListener))
 
     addEventListener(
@@ -271,6 +291,10 @@ export const useTickerAnimation = ({
 
         if (typeof onMouseUp === 'function') {
           onMouseUp()
+        }
+
+        if (wrapperRef.current) {
+          wrapperRef.current.style.willChange = 'auto'
         }
 
         if (

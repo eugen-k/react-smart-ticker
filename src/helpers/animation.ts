@@ -78,13 +78,13 @@ export class Animation {
     if (this.infiniteScrollView) {
       switch (this.axis) {
         case 'x': {
-          const wrapperX = Number(this.wrapperEl?.current?.style['left'].replace('px', ''))
+          const wrapperX = Number(this.wrapperEl?.current?.style.left.replace('px', ''))
           const tickerWidth = Number(this.tickerEl?.current?.style.minWidth.replace('px', ''))
 
           if (this.wrapperEl && wrapperX >= tickerWidth) {
             if (!this.isDragging) this.iterationCounter++
             requestAnimationFrame(() => {
-              this.wrapperEl!.current!.style['left'] = wrapperX - tickerWidth + 'px'
+              this.wrapperEl!.current!.style.left = wrapperX - tickerWidth + 'px'
             })
             break
           }
@@ -92,7 +92,7 @@ export class Animation {
           if (this.wrapperEl && wrapperX <= -tickerWidth) {
             if (!this.isDragging) this.iterationCounter++
             requestAnimationFrame(() => {
-              this.wrapperEl!.current!.style['left'] = wrapperX + tickerWidth + 'px'
+              this.wrapperEl!.current!.style.left = wrapperX + tickerWidth + 'px'
             })
             break
           }
