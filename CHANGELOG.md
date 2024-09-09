@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/eugen-k/react-smart-ticker/compare/v1.2.0...v1.3.0) (2024-09-09)
+
+
+### Features
+
+* add will-change css style ([f9a83f6](https://github.com/eugen-k/react-smart-ticker/commit/f9a83f6c712ff28392ca83e386a608939bf73bde))
+
 ## [1.2.0](https://github.com/eugen-k/react-smart-ticker/compare/v1.1.8...v1.2.0) (2024-08-05)
 
 ### Features
