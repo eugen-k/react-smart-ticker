@@ -50,7 +50,7 @@ export const useTickerAnimation = ({
   onMouseUp
 }: UseTickerAnimationHookParams): UseTickerAnimationHookReturn => {
   const axis = direction === 'left' || direction === 'right' ? 'x' : 'y'
-  const sideX = rtl ? 'right' : 'left'
+  //const sideX = rtl ? 'right' : 'left'
 
   const animationRef = useRef(new Animation())
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -69,7 +69,6 @@ export const useTickerAnimation = ({
       removeEventListener('mouseup', mouseUpHandler)
       removeEventListener('touchmove', touchListener)
       removeEventListener('touchend', touchEndHandler)
-      animationRef.current.pause()
       animationRef.current.backToStartPosition()
     }
   }, [])
@@ -92,6 +91,7 @@ export const useTickerAnimation = ({
         playOnHover,
         rtl,
         iterations,
+        play: isPaused,
         onAnimationEnd: () => {
           if (isHovered && playOnHover) {
             animationRef.current.pause()
@@ -109,9 +109,6 @@ export const useTickerAnimation = ({
 
     return () => {
       !!timeoutId && clearTimeout(timeoutId)
-      animationRef.current.pause()
-      animationRef.current.setCounter(0)
-      animationRef.current.backToStartPosition()
       setIsPaused(true)
     }
   }, [
@@ -132,7 +129,7 @@ export const useTickerAnimation = ({
       // reset iterationCounter if playOnHover option is true, to play the animation again once hovered
       if (playOnHover) {
         animationRef.current.setCounter(0)
-        // move back to the start position if the playOnHover options are true
+        // move back to the start position if the playOnHover option is true
         animationRef.current.backToStartPosition()
       }
     } else if (canBeAnimated) {
@@ -171,18 +168,23 @@ export const useTickerAnimation = ({
     let deltaX = 0
     let deltaY = 0
 
+    // min "top" or "left" position depending on the direction
     const minPos: { [Property in typeof axis]: { [Property in Directions]?: number } } = {
-      y: { top: -(tickerRect.height - containerRect.height) },
+      y: {
+        top: -(tickerRect.height - containerRect.height),
+        bottom: 0
+      },
       x: {
         left: -(tickerRect.width - containerRect.width),
-        right: -(tickerRect.width - containerRect.width)
+        right: 0
       }
     }
+    // max "top" or "left" position depending on the direction
     const maxPos: { [Property in typeof axis]: { [Property in Directions]?: number } } = {
-      y: { top: 0 },
+      y: { top: 0, bottom: tickerRect.height - containerRect.height },
       x: {
         left: 0,
-        right: 0
+        right: tickerRect.width - containerRect.width
       }
     }
 
@@ -194,30 +196,25 @@ export const useTickerAnimation = ({
       oldY = (e as MouseEvent).clientY ?? (e as TouchEvent).touches[0]?.clientY
 
       requestAnimationFrame(() => {
-        const sign = sideX === 'left' || axis === 'y' ? 1 : -1
-
         if (infiniteScrollView) {
-          wrapperRef.current!.style[axis === 'x' ? sideX : 'top'] =
-            Number(wrapperRef.current!.style[axis === 'x' ? sideX : 'top'].replace('px', '')) -
-            (axis === 'x' ? deltaX : deltaY) * sign +
+          wrapperRef.current!.style[axis === 'x' ? 'left' : 'top'] =
+            Number(wrapperRef.current!.style[axis === 'x' ? 'left' : 'top'].replace('px', '')) -
+            (axis === 'x' ? deltaX : deltaY) +
             'px' // update position
           animationRef.current.alignPosition()
         } else {
           const curPos = Number(
-            wrapperRef.current!.style[axis === 'x' ? sideX : 'top'].replace('px', '')
+            wrapperRef.current!.style[axis === 'x' ? 'left' : 'top'].replace('px', '')
           )
-          const newPos = curPos - (axis === 'x' ? deltaX : deltaY) * sign
+          const newPos = curPos - (axis === 'x' ? deltaX : deltaY)
 
-          if (
-            newPos < minPos[axis][axis === 'x' ? sideX : 'top']! ||
-            newPos > maxPos[axis][axis === 'x' ? sideX : 'top']!
-          ) {
+          if (newPos < minPos[axis][direction]! || newPos > maxPos[axis][direction]!) {
             deltaX = deltaX / 50
             deltaY = deltaY / 50
           }
 
-          wrapperRef.current!.style[axis === 'x' ? sideX : 'top'] =
-            curPos - (axis === 'x' ? deltaX : deltaY) * sign + 'px'
+          wrapperRef.current!.style[axis === 'x' ? 'left' : 'top'] =
+            curPos - (axis === 'x' ? deltaX : deltaY) + 'px'
         }
       })
     }
@@ -261,12 +258,20 @@ export const useTickerAnimation = ({
   const onTouchStartHandler = (e: React.TouchEvent) => {
     animationRef.current.setIsDragging(true)
 
+    if (typeof onMouseDown === 'function') {
+      onMouseDown()
+    }
+
     addEventListener('touchmove', (touchListener = onMoveHandler(e) as EventListener))
 
     addEventListener(
       'touchend',
       (touchEndHandler = () => {
         animationRef.current.setIsDragging(false)
+
+        if (typeof onMouseUp === 'function') {
+          onMouseUp()
+        }
 
         if (
           canBeAnimated &&

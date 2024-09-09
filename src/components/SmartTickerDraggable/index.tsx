@@ -57,7 +57,7 @@ export const SmartTickerDraggable: FC<SmartTickerDraggableProps> = ({
     infiniteScrollView,
     smart,
     waitForFonts,
-    axis,
+    direction,
     autoFill,
     speed,
     recalcDeps
@@ -105,18 +105,24 @@ export const SmartTickerDraggable: FC<SmartTickerDraggableProps> = ({
   const filledWithChildren = useMemo(() => {
     if (!autoFill) return children
     return new Array(amountToFill).fill(0).map((_, i) => {
-      return <Fragment key={i}>{children}</Fragment>
+      return (
+        <Fragment key={i}>
+          {children}
+          {axis === 'y' && amountToFill > 1 && isText && <br />}
+        </Fragment>
+      )
     })
   }, [children, autoFill, amountToFill])
 
   const isRowEllipses = useMemo(() => {
     if (
-      axis === 'x' &&
+      (direction === 'left' || (direction === 'right' && rtl)) &&
       isText &&
       isPaused &&
       !pauseOnHover &&
       !isDragging &&
       !isChildFit &&
+      !autoFill &&
       isCalculated
     ) {
       return true
@@ -127,12 +133,14 @@ export const SmartTickerDraggable: FC<SmartTickerDraggableProps> = ({
 
   const isColumnEllipses = useMemo(() => {
     if (
-      axis === 'y' &&
+      direction === 'top' &&
       isPaused &&
+      isText &&
       !pauseOnHover &&
       !isDragging &&
       !isChildFit &&
       multiLine &&
+      !autoFill &&
       isCalculated
     ) {
       return true
@@ -150,10 +158,11 @@ export const SmartTickerDraggable: FC<SmartTickerDraggableProps> = ({
     justifyItems: 'flex-start',
     flexDirection: axis === 'x' ? 'row' : 'column',
     userSelect: disableSelect ? 'none' : 'unset',
+    WebkitUserSelect: disableSelect ? 'none' : 'unset',
+    WebkitTouchCallout: disableSelect ? 'none' : 'unset',
     ...(axis === 'x' && { minWidth: tickerRect.width, whiteSpace: 'nowrap' }),
     ...(axis === 'y' && {
       minHeight: tickerRect.height,
-      /* width: '100%', */
       whiteSpace: 'normal'
     }),
     direction: rtl ? 'rtl' : 'ltr',
@@ -174,7 +183,10 @@ export const SmartTickerDraggable: FC<SmartTickerDraggableProps> = ({
     ...(rtl &&
       axis === 'x' && {
         transform: `translate${axis}(-100%)`,
-        left: `${containerRect.width}px`
+        left: `${tickerRect.width}px`,
+        ...(isRowEllipses && {
+          left: `${containerRect.width}px`
+        })
       })
   }
 
@@ -198,7 +210,7 @@ export const SmartTickerDraggable: FC<SmartTickerDraggableProps> = ({
         containerRef={containerRef}
         containerRect={containerRect}
         direction={direction}
-        rtl={rtl}
+        infiniteScrollView={infiniteScrollView}
         style={containerStyle}
         onResizeHandler={onResizeHandler}
       >
@@ -221,8 +233,8 @@ export const SmartTickerDraggable: FC<SmartTickerDraggableProps> = ({
     <TickerContainer
       containerRef={containerRef}
       containerRect={containerRect}
+      infiniteScrollView={infiniteScrollView}
       direction={direction}
-      rtl={rtl}
       style={containerStyle}
       onResizeHandler={onResizeHandler}
       draggable

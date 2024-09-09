@@ -14,6 +14,7 @@ type InitParams = {
   playOnHover: boolean
   rtl: boolean
   iterations: Iterations
+  play: boolean
   onAnimationEnd?: () => void
 }
 
@@ -24,6 +25,7 @@ export class Animation {
   private containerRect: ElRect
   private axis: 'x' | 'y'
   private sign: -1 | 1
+  private direction: Directions
   private prevTime: number = 0
   private isDragging: boolean = false
   private iterationCounter: number = 0
@@ -35,7 +37,6 @@ export class Animation {
   private playOnHover: boolean = false
   private delayBack: number
   private iterations: Iterations
-  private sideX: 'left' | 'right' = 'left'
   private isInited: boolean = false
   private onAnimationEnd: (() => void) | null
 
@@ -43,11 +44,10 @@ export class Animation {
     const step = this.speed * fraction * this.sign
 
     const newPos =
-      Number(
-        this.wrapperEl!.current!.style[this.axis === 'x' ? this.sideX : 'top'].replace('px', '')
-      ) + step
+      Number(this.wrapperEl!.current!.style[this.axis === 'x' ? 'left' : 'top'].replace('px', '')) +
+      step
 
-    this.wrapperEl!.current!.style[this.axis === 'x' ? this.sideX : 'top'] = newPos + 'px'
+    this.wrapperEl!.current!.style[this.axis === 'x' ? 'left' : 'top'] = newPos + 'px'
     this.alignPosition()
   }
 
@@ -78,13 +78,13 @@ export class Animation {
     if (this.infiniteScrollView) {
       switch (this.axis) {
         case 'x': {
-          const wrapperX = Number(this.wrapperEl?.current?.style[this.sideX].replace('px', ''))
+          const wrapperX = Number(this.wrapperEl?.current?.style['left'].replace('px', ''))
           const tickerWidth = Number(this.tickerEl?.current?.style.minWidth.replace('px', ''))
 
           if (this.wrapperEl && wrapperX >= tickerWidth) {
             if (!this.isDragging) this.iterationCounter++
             requestAnimationFrame(() => {
-              this.wrapperEl!.current!.style[this.sideX] = wrapperX - tickerWidth + 'px'
+              this.wrapperEl!.current!.style['left'] = wrapperX - tickerWidth + 'px'
             })
             break
           }
@@ -92,7 +92,7 @@ export class Animation {
           if (this.wrapperEl && wrapperX <= -tickerWidth) {
             if (!this.isDragging) this.iterationCounter++
             requestAnimationFrame(() => {
-              this.wrapperEl!.current!.style[this.sideX] = wrapperX + tickerWidth + 'px'
+              this.wrapperEl!.current!.style['left'] = wrapperX + tickerWidth + 'px'
             })
             break
           }
@@ -130,28 +130,33 @@ export class Animation {
         this.isInnerPaused = false
       }
     } else if (!this.isDragging) {
+      // min "top" or "left" position depending on the direction
       const minPos: { [Property in typeof this.axis]: { [Property in Directions]?: number } } = {
-        y: { top: -(this.tickerRect.height - this.containerRect.height) },
+        y: {
+          top: -(this.tickerRect.height - this.containerRect.height),
+          bottom: 0
+        },
         x: {
           left: -(this.tickerRect.width - this.containerRect.width),
-          right: -(this.tickerRect.width - this.containerRect.width)
+          right: 0
         }
       }
+      // max "top" or "left" position depending on the direction
       const maxPos: { [Property in typeof this.axis]: { [Property in Directions]?: number } } = {
-        y: { top: 0 },
+        y: { top: 0, bottom: this.tickerRect.height - this.containerRect.height },
         x: {
           left: 0,
-          right: 0
+          right: this.tickerRect.width - this.containerRect.width
         }
       }
 
       const newPos = Number(
-        this.wrapperEl!.current!.style[this.axis === 'x' ? this.sideX : 'top'].replace('px', '')
+        this.wrapperEl!.current!.style[this.axis === 'x' ? 'left' : 'top'].replace('px', '')
       )
 
       if (
-        newPos < minPos[this.axis][this.axis === 'x' ? this.sideX : 'top']! ||
-        newPos > maxPos[this.axis][this.axis === 'x' ? this.sideX : 'top']!
+        newPos < minPos[this.axis][this.direction]! ||
+        newPos > maxPos[this.axis][this.direction]!
       ) {
         this.iterationCounter++
         this.isInnerPaused = true
@@ -166,8 +171,8 @@ export class Animation {
   private restartLoop = () => {
     const restart = () => {
       if (this.wrapperEl.current) {
-        this.wrapperEl.current.style.transition = `${this.sideX} .2s linear, top .2s linear`
-        this.wrapperEl.current.style[this.axis === 'x' ? this.sideX : 'top'] = 0 + 'px'
+        this.wrapperEl.current.style.transition = `${this.axis === 'x' ? 'left' : 'top'} .2s linear, top .2s linear`
+        this.wrapperEl.current.style[this.axis === 'x' ? 'left' : 'top'] = 0 + 'px'
 
         setTimeout(() => {
           if (this.wrapperEl.current) {
@@ -237,15 +242,15 @@ export class Animation {
     direction,
     playOnHover,
     iterations,
-    rtl,
+    play,
     onAnimationEnd
   }: InitParams) {
     this.tickerEl = tickerEl
     this.wrapperEl = wrapperEl
     this.axis = direction === 'left' || direction === 'right' ? 'x' : 'y'
-    this.sign = direction === 'left' || rtl || direction === 'top' ? -1 : 1
+    this.sign = direction === 'left' || direction === 'top' ? -1 : 1
     this.speed = speed
-    this.isPaused = true
+    this.isPaused = play
     this.iterations = iterations
     this.onAnimationEnd = onAnimationEnd || null
     this.iterationCounter = 0
@@ -255,13 +260,10 @@ export class Animation {
     this.delay = delay
     this.delayBack = delayBack
     this.playOnHover = playOnHover
-
-    if (rtl) {
-      this.sideX = 'right'
-    }
+    this.direction = direction
 
     if (startPosition) {
-      this.wrapperEl!.current!.style[this.axis === 'x' ? this.sideX : 'top'] = startPosition + 'px'
+      this.wrapperEl!.current!.style[this.axis === 'x' ? 'left' : 'top'] = startPosition + 'px'
     }
 
     this.isInited = true
@@ -275,8 +277,8 @@ export class Animation {
     if (!this.isDragging) {
       requestAnimationFrame(() => {
         if (this.wrapperEl.current) {
-          this.wrapperEl.current.style.transition = `${this.sideX} .2s linear, top .2s linear`
-          this.wrapperEl.current.style[this.axis === 'x' ? this.sideX : 'top'] = 0 + 'px'
+          this.wrapperEl.current.style.transition = `${this.axis === 'x' ? 'left' : 'top'} .2s linear, top .2s linear`
+          this.wrapperEl.current.style[this.axis === 'x' ? 'left' : 'top'] = 0 + 'px'
 
           setTimeout(() => {
             if (this.wrapperEl.current) {

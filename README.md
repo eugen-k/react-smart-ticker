@@ -1,14 +1,42 @@
-# React Smart Ticker
+<p align="center">
+  <img alt="React Smart Ticker Demo" width="600px" src="https://github.com/eugen-k/react-smart-ticker-demo/blob/main/src/assets/gif/demo2.gif">
+</p>
 
-React component that optionally transforms child elements into a (optionally draggable) ticker/marquee. By default, treats its content as text and then tries to fit it into the container. If it doesn't, truncates it and runs a "ticker-like" animation for one-line content or vertical animation for text in columns. A fitted text leaves as it is.
-Can be draggable
+<h1 align="center">React Smart Ticker</h1>
+
+<p align="center">
+  <a aria-label="NPM Type Definitions" href="https://www.npmjs.com/package/react-smart-ticker">
+    <img alt="NPM Type Definitions" src="https://img.shields.io/npm/types/react-smart-ticker">
+  </a>
+  <a aria-label="npm package minimized gzipped size" href="https://www.npmjs.com/package/react-smart-ticker">
+    <img alt="npm package minimized gzipped size" src="https://img.shields.io/bundlejs/size/react-smart-ticker">
+  </a>
+  <a aria-label="Codecov" href="https://www.npmjs.com/package/react-smart-ticker">
+    <img alt="Codecov" src="https://img.shields.io/codecov/c/github/eugen-k/react-smart-ticker?logo=codecov&logoColor=%23F01F7A&label=codecov">
+  </a>
+  <a aria-label="GitHub License" href="https://www.npmjs.com/package/react-smart-ticker">
+    <img alt="GitHub License" src="https://img.shields.io/github/license/eugen-k/react-smart-ticker">
+  </a>
+</p>
+
+[**React Smart Ticker**](https://eugen-k.github.io/react-smart-ticker-demo/) is a React component that automatically displays text as a scrolling ticker/marquee when it overflows the container.
+
+<!-- <img src="https://github.com/eugen-k/react-smart-ticker-demo/blob/main/src/assets/gif/multi-line.gif" alt="Multi-line" width="100" height="auto">
+<img src="https://github.com/eugen-k/react-smart-ticker-demo/blob/main/src/assets/gif/1-line.gif" alt="1-line" width="100" height="auto">
+<img src="https://github.com/eugen-k/react-smart-ticker-demo/blob/main/src/assets/gif/html.gif" alt="HTML blocks ticker" width="100" height="auto"> -->
+
+## Demo
+
+https://eugen-k.github.io/react-smart-ticker-demo/
 
 ## Features
 
-- Zero dependency
-- Supports RTL
-- Highly customisable
+- Multiline support
 - Can be used as a ticker/marquee for any element e.g. text, images, HTML blocks
+- Optionally draggable
+- Supports RTL
+- Highly customizable
+- Zero dependency
 
 ## _SmartTicker_ and _SmartTickerDraggable_ component differences
 
@@ -25,7 +53,7 @@ Can be draggable
 - can have a delay before animating back to the start position
 
 > [!IMPORTANT]
-> For complex elements (e.g. images) is recommended to use **SmartTicker** as browsers are performing [better](https://developer.mozilla.org/en-US/docs/Web/Performance/CSS_JavaScript_animation_performance) using CSS-based animation.
+> For complex elements (e.g. images) is recommended to use **SmartTicker** component as browsers are performing [better](https://developer.mozilla.org/en-US/docs/Web/Performance/CSS_JavaScript_animation_performance) using CSS-based animation.
 
 ## Installation
 

@@ -359,7 +359,7 @@ describe('SmartTickerDraggable', () => {
     expect(Number(wrapper.style.top.replace('px', ''))).toBe(curPos - 20)
   })
 
-  test('resets its position on window resize', async () => {
+  test("doesn't reset its position on window resize", async () => {
     mockGetBoundingClientRect
       // container rect
       .mockReturnValueOnce({
@@ -393,8 +393,10 @@ describe('SmartTickerDraggable', () => {
       window.dispatchEvent(new Event('resize'))
     })
 
+    const curPos = Math.abs(Number(wrapper.style.left.replace('px', '')))
+
     await waitFor(async () => new Promise((r) => setTimeout(r, 250)))
 
-    expect(Math.abs(Number(wrapper.style.left.replace('px', '')))).toBeLessThan(2)
+    expect(Math.abs(Number(wrapper.style.left.replace('px', '')))).toBeGreaterThan(curPos)
   })
 })
