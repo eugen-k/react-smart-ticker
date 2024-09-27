@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/eugen-k/react-smart-ticker/compare/v1.3.0...v1.3.1) (2024-09-27)
+
+
+### Miscellaneous Chores
+
+* release 1.3.1 ([cef3090](https://github.com/eugen-k/react-smart-ticker/commit/cef3090bf5b2d8c6cf20f96d679acbc6a956c885))
+
 ## [1.3.0](https://github.com/eugen-k/react-smart-ticker/compare/v1.2.0...v1.3.0) (2024-09-09)
 
 
