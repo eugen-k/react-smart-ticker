@@ -22,7 +22,7 @@ type UseSmartCheckHook = (args: Props) => {
   duration: number
   amountToFill: number
   isCalculated: boolean
-  reset: () => void
+  recalc: () => void
 }
 
 export const useSmartCheck: UseSmartCheckHook = ({
@@ -47,7 +47,7 @@ export const useSmartCheck: UseSmartCheckHook = ({
   const [amountToFill, setAmountToFill] = useState(1)
   const [isChildFit, setIsChildFit] = useState(true)
   const [isCalculated, setIsCalculated] = useState(false)
-  const [recalc, setRecalc] = useState(new Date().getTime())
+  const [recalcToken, setRecalcToken] = useState(new Date().getTime())
 
   useLayoutEffect(() => {
     if (waitForFonts) {
@@ -58,21 +58,21 @@ export const useSmartCheck: UseSmartCheckHook = ({
     } else {
       smartCheck()
     }
-  }, [recalc])
+  }, [recalcToken])
 
   useEffect(() => {
     // prevent reset while the initial component loading
     if (isCalculated) {
-      reset()
+      recalc()
     }
   }, [children, smart, autoFill, multiLine, speed, direction, infiniteScrollView, ...recalcDeps])
 
-  const reset = () => {
+  const recalc = () => {
     setAmountToFill(1)
     setIsChildFit(true)
     setDuration(0)
     setIsCalculated(false)
-    setRecalc(new Date().getTime())
+    setRecalcToken(new Date().getTime())
   }
 
   const smartCheck = () => {
@@ -221,6 +221,6 @@ export const useSmartCheck: UseSmartCheckHook = ({
     duration,
     amountToFill,
     isCalculated,
-    reset
+    recalc
   }
 }

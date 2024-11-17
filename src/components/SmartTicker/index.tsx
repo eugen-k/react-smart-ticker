@@ -1,4 +1,4 @@
-import React, { FC, Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import React, { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import styles from './smartTicker.module.scss'
 import { useSmartCheck } from '../../hooks/useSmartCheck'
 import { TickerContainer } from '../TickerContainer'
@@ -57,7 +57,7 @@ const CSSDirectionParams = {
  *
  * @visibleName React Smart Ticker
  */
-const SmartTicker: FC<SmartTickerProps> = ({
+const SmartTicker: React.FC<SmartTickerProps> = ({
   children,
   smart = true,
   isText = true,
@@ -99,7 +99,7 @@ const SmartTicker: FC<SmartTickerProps> = ({
     duration,
     amountToFill,
     isCalculated,
-    reset
+    recalc
   } = useSmartCheck({
     direction,
     autoFill,
@@ -108,6 +108,7 @@ const SmartTicker: FC<SmartTickerProps> = ({
     speed,
     smart,
     waitForFonts,
+    recalcDeps,
     children
   })
 
@@ -118,7 +119,7 @@ const SmartTicker: FC<SmartTickerProps> = ({
   useLayoutEffect(() => {
     // prevent reset while the initial component loading
     if (isCalculated) {
-      reset()
+      recalc()
     }
   }, [...recalcDeps])
 
@@ -144,7 +145,7 @@ const SmartTicker: FC<SmartTickerProps> = ({
   }, [isPaused])
 
   const onResizeHandler = () => {
-    reset()
+    recalc()
   }
 
   const onHoverHandler = (hovered: boolean) => {
@@ -224,8 +225,19 @@ const SmartTicker: FC<SmartTickerProps> = ({
     }
   }, [axis, isText, isPaused, playOnDemand, multiLine, autoFill, isChildFit, isCalculated])
 
+  const displayValue = useMemo(() => {
+    if (isRowEllipses) {
+      return 'inline-block'
+    } else if (isColumnEllipses) {
+      return '-webkit-box'
+    } else {
+      return 'flex'
+    }
+  }, [isRowEllipses, isColumnEllipses])
+
   const tickerStyle: React.CSSProperties = {
     ...style,
+    display: displayValue,
     animationDuration: duration + 's',
     direction: rtl ? 'rtl' : 'ltr',
     flexDirection: axis === 'x' ? 'row' : 'column',
@@ -257,12 +269,12 @@ const SmartTicker: FC<SmartTickerProps> = ({
     // styles for showing ellipses at the end of the line for the text content for "x" axis)
     ...(isRowEllipses && {
       minWidth: '100%',
-      display: 'inline-block',
+      display: displayValue,
       animationName: 'unset',
       textOverflow: 'ellipsis'
     }),
     ...(isColumnEllipses && {
-      display: '-webkit-box',
+      display: displayValue,
       WebkitLineClamp: multiLine,
       WebkitBoxOrient: 'vertical',
       maxHeight: containerRect.height
@@ -287,6 +299,7 @@ const SmartTicker: FC<SmartTickerProps> = ({
         style={tickerStyle}
         onAnimationEnd={() => {
           setIsPaused(true)
+          resetPosition()
         }}
       >
         {filledWithChildren}
@@ -297,7 +310,7 @@ const SmartTicker: FC<SmartTickerProps> = ({
           ref={tickerCloneElRef}
           data-testid={'ticker-2'}
           className={styles.ticker}
-          style={tickerStyle}
+          style={{ ...tickerStyle, display: isCalculated ? displayValue : 'none' }}
         >
           {filledWithChildren}
         </div>

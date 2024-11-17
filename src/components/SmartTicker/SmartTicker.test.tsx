@@ -3,6 +3,9 @@
 import React, { act, RefObject } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import SmartTicker from '.'
+import '@testing-library/jest-dom'
+import { jest } from '@jest/globals'
+import * as smartCheckHook from '../../hooks/useSmartCheck'
 
 const mockGetBoundingClientRect = jest.fn()
 
@@ -324,15 +327,17 @@ describe('SmartTicker', () => {
     expect(element).toHaveStyle({ 'animation-play-state': 'running' })
   })
 
-  test('resets is position on window resize', async () => {
-    const mockReset = jest.fn()
+  test('resets position on window resize', async () => {
+    jest.resetModules()
+
+    const mockRecalc = jest.fn()
 
     const defaultHookMock = {
       containerRef: {
-        current: { getBoundingClientRect: jest.fn(() => ({ width: 500 })) }
+        current: { getBoundingClientRect: jest.fn(() => ({ width: 500, height: 50 })) }
       } as unknown as RefObject<HTMLDivElement>,
       tickerRef: {
-        current: { getBoundingClientRect: jest.fn(() => ({ width: 300 })) }
+        current: { getBoundingClientRect: jest.fn(() => ({ width: 300, height: 50 })) }
       } as unknown as RefObject<HTMLDivElement>,
       containerRect: { height: 500, width: 500 },
       tickerRect: { height: 200, width: 200 },
@@ -340,22 +345,25 @@ describe('SmartTicker', () => {
       duration: 50,
       amountToFill: 1,
       isCalculated: true,
-      reset: mockReset
+      recalc: mockRecalc
     }
 
-    jest.doMock('../../hooks/useSmartCheck', () => ({
-      __esModule: true,
-      useSmartCheck: jest.fn(() => defaultHookMock)
-    }))
+    jest.spyOn(smartCheckHook, 'useSmartCheck').mockReturnValue(defaultHookMock)
 
-    import('.').then(async (SmartTicker) => {
-      await act(async () => {
-        render(
-          <SmartTicker.default smart={false} playOnHover>
-            Test
-          </SmartTicker.default>
-        )
-      })
+    await act(async () => {
+      render(
+        <SmartTicker smart={false} playOnHover>
+          Test
+        </SmartTicker>
+      )
     })
+
+    await act(async () => {
+      window.dispatchEvent(new Event('resize'))
+    })
+
+    await new Promise((r) => setTimeout(r, 300))
+
+    expect(mockRecalc).toHaveBeenCalled()
   })
 })
