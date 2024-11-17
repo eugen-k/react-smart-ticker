@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.4.0](https://github.com/eugen-k/react-smart-ticker/compare/v1.3.2...v1.4.0) (2024-11-17)
+
+
+### Features
+
+* add animation control ([ab4a7b3](https://github.com/eugen-k/react-smart-ticker/commit/ab4a7b3cc3bd05fe58095dcdc73e976bff83c834))
+
+
+### Bug Fixes
+
+* animation incorrect position after tab inactive for a long time ([ab4a7b3](https://github.com/eugen-k/react-smart-ticker/commit/ab4a7b3cc3bd05fe58095dcdc73e976bff83c834))
+
 ## [1.3.2](https://github.com/eugen-k/react-smart-ticker/compare/v1.3.1...v1.3.2) (2024-11-17)
 
 
