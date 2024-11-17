@@ -1,4 +1,4 @@
-import { CSSProperties, ReactNode } from 'react'
+import { CSSProperties, ForwardedRef, ReactNode } from 'react'
 
 export type SmartTickerProps = {
   /**
@@ -92,7 +92,14 @@ export type SmartTickerProps = {
   disableSelect?: boolean
   style?: CSSProperties
   containerStyle?: CSSProperties
+  forwardedRef?: ForwardedRef<SmartTickerHandle>
   children: ReactNode
+}
+
+export type SmartTickerHandle = {
+  play?: () => void
+  pause?: () => void
+  reset?: (isPaused: boolean) => void
 }
 
 export type Directions = 'left' | 'right' | 'top' | 'bottom'

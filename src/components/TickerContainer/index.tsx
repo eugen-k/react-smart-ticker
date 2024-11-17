@@ -8,6 +8,7 @@ type Props = {
   containerRef: RefObject<HTMLDivElement>
   containerRect: { width: number; height: number }
   children: ReactNode
+  onVisibilityChangeHandler?: () => void
   onHoverHandler?: (hoverState: boolean) => void
   onClickHandler?: (clickState: boolean) => void
   draggable?: boolean
@@ -23,6 +24,7 @@ export const TickerContainer: FC<Props> = ({
   direction,
   onHoverHandler,
   onClickHandler,
+  onVisibilityChangeHandler,
   draggable = false,
   infiniteScrollView,
   onResizeHandler,
@@ -37,6 +39,16 @@ export const TickerContainer: FC<Props> = ({
 
       return () => {
         window.removeEventListener('resize', debounceFunc)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (typeof onVisibilityChangeHandler === 'function') {
+      document.addEventListener('visibilitychange', onVisibilityChangeHandler)
+
+      return () => {
+        document.removeEventListener('visibilitychange', onVisibilityChangeHandler)
       }
     }
   }, [])
