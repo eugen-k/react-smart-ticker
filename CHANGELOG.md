@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.2](https://github.com/eugen-k/react-smart-ticker/compare/v1.3.1...v1.3.2) (2024-11-17)
+
+
+### Bug Fixes
+
+* CSS animation resetting ([39375b4](https://github.com/eugen-k/react-smart-ticker/commit/39375b41d16741dbd8114f9b5adf73bf005026cd))
+
 ## [1.3.1](https://github.com/eugen-k/react-smart-ticker/compare/v1.3.0...v1.3.1) (2024-09-27)
 
 
