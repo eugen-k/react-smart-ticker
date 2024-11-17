@@ -1,4 +1,4 @@
-import React, { FC, Fragment, useCallback, useMemo, useState } from 'react'
+import React, { Fragment, useCallback, useMemo, useState } from 'react'
 import styles from './smartTickerDraggable.module.scss'
 import { useSmartCheck } from '../../hooks/useSmartCheck'
 import { SmartTickerDraggableProps } from '../../types/smartTickerTypes'
@@ -12,7 +12,7 @@ import { useTickerAnimation } from '../../hooks/useTickerAnimation'
  *
  * @visibleName React Smart Ticker
  */
-export const SmartTickerDraggable: FC<SmartTickerDraggableProps> = ({
+export const SmartTickerDraggable: React.FC<SmartTickerDraggableProps> = ({
   children,
   smart = true,
   autoFill = false,
@@ -50,7 +50,7 @@ export const SmartTickerDraggable: FC<SmartTickerDraggableProps> = ({
     isChildFit,
     amountToFill,
     isCalculated,
-    reset: smartCheckReset
+    recalc: smartCheckReset
   } = useSmartCheck({
     children,
     multiLine,
@@ -149,9 +149,19 @@ export const SmartTickerDraggable: FC<SmartTickerDraggableProps> = ({
     }
   }, [axis, isText, isPaused, pauseOnHover, isDragging, multiLine, isChildFit, isCalculated])
 
+  const displayValue = useMemo(() => {
+    if (isRowEllipses) {
+      return 'inline-block'
+    } else if (isColumnEllipses) {
+      return '-webkit-box'
+    } else {
+      return 'flex'
+    }
+  }, [isRowEllipses, isColumnEllipses])
+
   const tickerStyle: React.CSSProperties = {
     ...style,
-    display: 'flex',
+    display: displayValue,
     flexWrap: 'nowrap',
     overflow: 'hidden',
     textSizeAdjust: 'none',
@@ -170,12 +180,12 @@ export const SmartTickerDraggable: FC<SmartTickerDraggableProps> = ({
     ...(isRowEllipses && {
       minWidth: containerRect.width,
       maxWidth: containerRect.width,
-      display: 'inline-block',
+      display: displayValue,
       textOverflow: 'ellipsis'
     }),
     // Show ellipses on Y-axis
     ...(isColumnEllipses && {
-      display: '-webkit-box',
+      display: displayValue,
       WebkitLineClamp: multiLine,
       WebkitBoxOrient: 'vertical',
       maxHeight: containerRect.height * multiLine
@@ -258,12 +268,20 @@ export const SmartTickerDraggable: FC<SmartTickerDraggableProps> = ({
           {filledWithChildren}
         </div>
 
-        {isCalculated && infiniteScrollView && (
+        {infiniteScrollView && (
           <>
-            <div data-testid={'ticker-2'} className={styles.ticker} style={tickerStyle}>
+            <div
+              data-testid={'ticker-2'}
+              className={styles.ticker}
+              style={{ ...tickerStyle, display: isCalculated ? displayValue : 'none' }}
+            >
               {filledWithChildren}
             </div>
-            <div data-testid={'ticker-3'} className={styles.ticker} style={tickerStyle}>
+            <div
+              data-testid={'ticker-3'}
+              className={styles.ticker}
+              style={{ ...tickerStyle, display: isCalculated ? displayValue : 'none' }}
+            >
               {filledWithChildren}
             </div>
           </>
