@@ -32,6 +32,7 @@ export class Animation {
   private infiniteScrollView: boolean
   private speed = 50
   private isInnerPaused = false
+  private isPausedByVisibility = false
   private isPaused = true
   private delay: number
   private playOnHover: boolean = false
@@ -62,7 +63,7 @@ export class Animation {
         !this.isInnerPaused &&
         (this.iterations === 'infinite' || this.iterationCounter < this.iterations)
       ) {
-        const fraction = (time - this.prevTime) / 1000
+        const fraction = Math.min((time - this.prevTime) / 1000, 0.1)
         this.prevTime = time
         this.draw(fraction)
 
@@ -207,6 +208,7 @@ export class Animation {
 
   pause() {
     this.isPaused = true
+    this.isPausedByVisibility = false
   }
 
   setIsDragging(drag: boolean) {
@@ -221,11 +223,26 @@ export class Animation {
     if (!this.isInited) return
 
     this.isPaused = false
+    this.isPausedByVisibility = false
 
     if (!this.isDragging) {
       setTimeout(() => {
         this.animate()
       }, this.delay)
+    }
+  }
+
+  toggleByVisibility() {
+    if (!this.isInited) return
+
+    if (!this.isPaused && document?.visibilityState === 'hidden') {
+      // Pausing the animation due to visibility change
+      this.isPaused = true
+      this.isPausedByVisibility = true
+    } else if (this.isPausedByVisibility && document?.visibilityState === 'visible') {
+      // Resuming animation previously paused by visibility change
+      this.prevTime = performance.now() // Reset the timer to avoid animation jumps
+      this.play()
     }
   }
 
@@ -269,10 +286,10 @@ export class Animation {
     this.isInited = true
   }
 
-  backToStartPosition() {
+  backToStartPosition(isPaused: boolean = true) {
     if (!this.isInited) return
 
-    this.isPaused = true
+    this.isPaused = isPaused
 
     if (!this.isDragging) {
       requestAnimationFrame(() => {

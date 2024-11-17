@@ -1,6 +1,15 @@
-import { MouseEvent, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import {
+  ForwardedRef,
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+  useState
+} from 'react'
 import { Animation } from '../helpers/animation'
-import { Directions, ElRect, Iterations } from '../types/smartTickerTypes'
+import { Directions, ElRect, Iterations, SmartTickerHandle } from '../types/smartTickerTypes'
 
 type UseTickerAnimationHookParams = {
   isCalculated: boolean
@@ -19,11 +28,13 @@ type UseTickerAnimationHookParams = {
   pauseOnHover: boolean
   onMouseDown?: () => void
   onMouseUp?: () => void
+  forwardedRef?: ForwardedRef<SmartTickerHandle>
 }
 
 type UseTickerAnimationHookReturn = {
   onMouseDownHandler: (e: React.MouseEvent) => void
   onMoveHandler: (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => void
+  onVisibilityChangeHandler: () => void
   onTouchStartHandler: (e: React.TouchEvent) => void
   onContainerHoverHandler: (hoverState: boolean) => void
   isPaused: boolean
@@ -47,7 +58,8 @@ export const useTickerAnimation = ({
   pauseOnHover,
   canBeAnimated,
   onMouseDown,
-  onMouseUp
+  onMouseUp,
+  forwardedRef
 }: UseTickerAnimationHookParams): UseTickerAnimationHookReturn => {
   const axis = direction === 'left' || direction === 'right' ? 'x' : 'y'
   //const sideX = rtl ? 'right' : 'left'
@@ -57,6 +69,18 @@ export const useTickerAnimation = ({
 
   const [isPaused, setIsPaused] = useState(true)
   const [isHovered, setIsHovered] = useState(false)
+
+  useImperativeHandle(forwardedRef, () => ({
+    play: () => {
+      animationRef.current.play()
+    },
+    pause: () => {
+      animationRef.current.pause()
+    },
+    reset: (isPaused = true) => {
+      animationRef.current.backToStartPosition(isPaused)
+    }
+  }))
 
   let dragListener: EventListener
   let touchListener: EventListener
@@ -312,11 +336,16 @@ export const useTickerAnimation = ({
     )
   }
 
+  const onVisibilityChangeHandler = useCallback(() => {
+    animationRef.current.toggleByVisibility()
+  }, [])
+
   return {
     onMouseDownHandler,
     onMoveHandler,
     onTouchStartHandler,
     onContainerHoverHandler,
+    onVisibilityChangeHandler,
     isPaused,
     wrapperRef,
     animation: animationRef.current

@@ -126,7 +126,69 @@ export default App
 | `disableSelect`      | `boolean`                                      | No       | `false`      | Controls the possibility of a user to select text in a ticker                                                                                                     |
 | `style`              | `CSSProperties`                                | No       | `null`       | Ticker component custom CSS styles                                                                                                                                |
 | `containerStyle`     | `CSSProperties`                                | No       | `null`       | Ticker container component custom CSS styles                                                                                                                      |
+| `forwardedRef`       | `ForwardedRef`                                 | No       | `null`       | Forwareded Ref for controlling the animation state                                                                                                                |
 
-## License
+## Controlling the Play, Pause snd Reset States
+
+The components provide methods for developers to control the ticker’s play, pause and resets state programmatically. These methods are accessible via `forwardedRef` and allow you to start, stop and reset the ticker based on your app’s requirements.
+
+### Exposed Methods
+
+To enable control over play and pause, react-smart-ticker uses forwardRef. The component exposes the following methods:
+
+- **play()**: Starts the ticker animation.
+- **pause()**: Pauses the ticker animation.
+- **reset(isPaused: boolean)**: Resets the ticker animation. `isPaused` flag sets the state of the animation after resetting.
+
+### Usage
+
+To use these methods, you need to: 1. Create a reference using useRef. 2. Attach the ref to the SmartTicker component. 3. Call the play and pause methods directly from the ref.
+
+### Example
+
+Here’s an example of setting up and using play and pause with react-smart-ticker:
+
+```javascript
+import { useRef } from 'react';
+import SmartTicker from 'react-smart-ticker';
+
+function App() {
+  // Create a ref to access SmartTicker methods
+  const tickerRef = useRef<{
+    play: () => void
+    pause: () => void
+    reset: (isPaused: boolean) => void
+  }>(null)
+
+  // Define handlers to control the ticker
+  const handlePlay = () => {
+    tickerRef.current?.play()
+  }
+
+  const handlePause = () => {
+    tickerRef.current?.pause()
+  }
+
+  const handleReset = (isPaused: boolean = true) => {
+    tickerRef.current?.reset(isPaused)
+  }
+
+  return (
+    <div>
+      <SmartTicker forwardedRef={tickerRef}>
+        <p>Your ticker content goes here</p>
+      </SmartTicker>
+
+      <button onClick={() => { handlePlay() }}>Play</button>
+      <button onClick={() => { handlePause() }}>Pause</button>
+      <button onClick={() => { handleReset(true) }}>Reset (w/pause)</button>
+    </div>
+  )
+}
+
+export default App;
+```
+
+## Licence
 
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/eugen-k/react-smart-ticker/blob/main/LICENSE) file for details.

@@ -1,4 +1,12 @@
-import React, { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import React, {
+  Fragment,
+  useEffect,
+  useImperativeHandle,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 import styles from './smartTicker.module.scss'
 import { useSmartCheck } from '../../hooks/useSmartCheck'
 import { TickerContainer } from '../TickerContainer'
@@ -77,6 +85,7 @@ const SmartTicker: React.FC<SmartTickerProps> = ({
   disableSelect = false,
   recalcDeps = [],
   style,
+  forwardedRef,
   containerStyle
 }) => {
   const tickerCloneElRef = useRef<HTMLDivElement>(null)
@@ -114,14 +123,20 @@ const SmartTicker: React.FC<SmartTickerProps> = ({
 
   const [isPaused, setIsPaused] = useState(true)
 
-  const canBeAnimated = !(smart && isChildFit) && isCalculated
+  const canBeAnimated = !(smart && isChildFit)
 
-  useLayoutEffect(() => {
-    // prevent reset while the initial component loading
-    if (isCalculated) {
-      recalc()
+  useImperativeHandle(forwardedRef, () => ({
+    play: () => {
+      setIsPaused(false)
+    },
+    pause: () => {
+      setIsPaused(true)
+    },
+    reset: (isPaused = true) => {
+      setIsPaused(isPaused)
+      resetPosition()
     }
-  }, [...recalcDeps])
+  }))
 
   useLayoutEffect(() => {
     setIsPaused((smart && isChildFit) || playOnDemand)
@@ -320,3 +335,55 @@ const SmartTicker: React.FC<SmartTickerProps> = ({
 }
 
 export default SmartTicker
+
+function App() {
+  // Create a ref to access SmartTicker methods
+  const tickerRef = useRef<{
+    play: () => void
+    pause: () => void
+    reset: (isPaused: boolean) => void
+  }>(null)
+
+  // Define handlers to control the ticker
+  const handlePlay = () => {
+    tickerRef.current?.play()
+  }
+
+  const handlePause = () => {
+    tickerRef.current?.pause()
+  }
+
+  const handleReset = (isPaused: boolean = true) => {
+    tickerRef.current?.reset(isPaused)
+  }
+
+  return (
+    <div>
+      <SmartTicker forwardedRef={tickerRef}>
+        <p>Your ticker content goes here</p>
+      </SmartTicker>
+
+      <button
+        onClick={() => {
+          handlePlay()
+        }}
+      >
+        Play
+      </button>
+      <button
+        onClick={() => {
+          handlePause()
+        }}
+      >
+        Pause
+      </button>
+      <button
+        onClick={() => {
+          handleReset(true)
+        }}
+      >
+        Reset (w/pause)
+      </button>
+    </div>
+  )
+}

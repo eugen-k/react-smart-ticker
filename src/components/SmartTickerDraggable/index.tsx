@@ -31,7 +31,8 @@ export const SmartTickerDraggable: React.FC<SmartTickerDraggableProps> = ({
   waitForFonts = isText ? true : false,
   multiLine = 0,
   infiniteScrollView = true,
-  disableSelect = false
+  disableSelect = false,
+  forwardedRef
 }) => {
   smart = smart && !autoFill
   pauseOnHover = playOnHover ? false : pauseOnHover
@@ -68,25 +69,32 @@ export const SmartTickerDraggable: React.FC<SmartTickerDraggableProps> = ({
     [isChildFit, smart, isChildFit, infiniteScrollView, isCalculated]
   )
 
-  const { onMouseDownHandler, onTouchStartHandler, onContainerHoverHandler, wrapperRef, isPaused } =
-    useTickerAnimation({
-      isCalculated,
-      tickerRef,
-      tickerRect,
-      containerRect,
-      infiniteScrollView,
-      delay,
-      delayBack,
-      speed,
-      canBeAnimated,
-      direction,
-      rtl,
-      iterations,
-      playOnHover,
-      pauseOnHover,
-      onMouseDown: onMouseDownInnerHandler,
-      onMouseUp: onMouseUpInnerHandler
-    })
+  const {
+    onMouseDownHandler,
+    onTouchStartHandler,
+    onContainerHoverHandler,
+    wrapperRef,
+    isPaused,
+    onVisibilityChangeHandler
+  } = useTickerAnimation({
+    isCalculated,
+    tickerRef,
+    tickerRect,
+    containerRect,
+    infiniteScrollView,
+    delay,
+    delayBack,
+    speed,
+    canBeAnimated,
+    direction,
+    rtl,
+    iterations,
+    playOnHover,
+    pauseOnHover,
+    onMouseDown: onMouseDownInnerHandler,
+    onMouseUp: onMouseUpInnerHandler,
+    forwardedRef
+  })
 
   const onResizeHandler = useCallback(() => {
     smartCheckReset()
@@ -247,6 +255,7 @@ export const SmartTickerDraggable: React.FC<SmartTickerDraggableProps> = ({
       direction={direction}
       style={containerStyle}
       onResizeHandler={onResizeHandler}
+      onVisibilityChangeHandler={onVisibilityChangeHandler}
       draggable
       {...((playOnHover || pauseOnHover) && { onHoverHandler: onContainerHoverHandler })}
     >

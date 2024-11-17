@@ -1,11 +1,43 @@
 /// <reference
 
-import React, { act, RefObject } from 'react'
+import React, { act, ReactNode, RefObject, useRef } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import SmartTicker from '.'
 import '@testing-library/jest-dom'
+import { SmartTickerProps } from '../../types/smartTickerTypes'
 import { jest } from '@jest/globals'
 import * as smartCheckHook from '../../hooks/useSmartCheck'
+
+// A helper component to facilitate testing with refs
+const SmartTickerWithControl = ({
+  play,
+  pause,
+  reset,
+  children,
+  ...props
+}: SmartTickerProps & {
+  play?: (cb: () => void) => void
+  pause?: (cb: () => void) => void
+  reset?: (cb: (isPaused: boolean) => void) => void
+  children: ReactNode
+}) => {
+  const tickerRef = useRef<{
+    play: () => void
+    pause: () => void
+    reset: () => void
+  }>(null)
+
+  // Expose the methods to the test through a ref
+  React.useEffect(() => {
+    if (tickerRef.current) {
+      if (typeof play === 'function') play(tickerRef.current.play)
+      if (typeof pause === 'function') pause(tickerRef.current.pause)
+      if (typeof reset === 'function') reset(tickerRef.current.reset)
+    }
+  }, [tickerRef.current])
+
+  return <SmartTicker {...{ ...props, forwardedRef: tickerRef }}>{children}</SmartTicker>
+}
 
 const mockGetBoundingClientRect = jest.fn()
 
@@ -327,8 +359,112 @@ describe('SmartTicker', () => {
     expect(element).toHaveStyle({ 'animation-play-state': 'running' })
   })
 
+  test('plays on play action', async () => {
+    let play: () => void
+
+    await act(async () => {
+      render(
+        <SmartTickerWithControl
+          play={(playFunc) => {
+            play = playFunc
+          }}
+          smart={false}
+          playOnClick
+        >
+          Test
+        </SmartTickerWithControl>
+      )
+    })
+
+    const element = screen.getByTestId('ticker-1')
+    expect(element).toHaveStyle({ 'animation-play-state': 'paused' })
+    await act(async () => {
+      play()
+    })
+    expect(element).toHaveStyle({ 'animation-play-state': 'running' })
+  })
+
+  test('pauses on pause action', async () => {
+    let pause: () => void
+
+    await act(async () => {
+      render(
+        <SmartTickerWithControl
+          pause={(pauseFunc) => {
+            pause = pauseFunc
+          }}
+          smart={false}
+          pauseOnClick
+          autoFill
+        >
+          Test
+        </SmartTickerWithControl>
+      )
+    })
+
+    const element = screen.getByTestId('ticker-1')
+    expect(element).toHaveStyle({ 'animation-play-state': 'running' })
+    await act(async () => {
+      pause()
+    })
+    expect(element).toHaveStyle({ 'animation-play-state': 'paused' })
+  })
+
+  test('resets with pause on reset action', async () => {
+    let reset: (isPaused: boolean) => void
+
+    await act(async () => {
+      render(
+        <SmartTickerWithControl
+          reset={(resetFunc) => {
+            reset = resetFunc
+          }}
+          smart={false}
+          pauseOnClick
+          autoFill
+        >
+          Test
+        </SmartTickerWithControl>
+      )
+    })
+
+    const element = screen.getByTestId('ticker-1')
+    expect(element).toHaveStyle({ 'animation-play-state': 'running' })
+    await act(async () => {
+      reset(true)
+    })
+    expect(element).toHaveStyle({ 'animation-play-state': 'paused' })
+  })
+
+  test('resets with playing on reset action', async () => {
+    let reset: (isPaused: boolean) => void
+
+    await act(async () => {
+      render(
+        <SmartTickerWithControl
+          reset={(resetFunc) => {
+            reset = resetFunc
+          }}
+          smart={false}
+          pauseOnClick
+          autoFill
+        >
+          Test
+        </SmartTickerWithControl>
+      )
+    })
+
+    const element = screen.getByTestId('ticker-1')
+    expect(element).toHaveStyle({ 'animation-play-state': 'running' })
+    await act(async () => {
+      reset(false)
+    })
+    expect(element).toHaveStyle({ 'animation-play-state': 'running' })
+  })
+
   test('resets position on window resize', async () => {
     jest.resetModules()
+    //jest.useFakeTimers()
 
     const mockRecalc = jest.fn()
 
