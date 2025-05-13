@@ -108,6 +108,7 @@ export type Iterations = 'infinite' | number
 export type SmartTickerDraggableProps = Omit<SmartTickerProps, 'pauseOnClick' | 'playOnClick'> & {
   delayBack?: number
   speedBack?: number
+  disableDragging?: boolean
 }
 
 export type ElRect = {

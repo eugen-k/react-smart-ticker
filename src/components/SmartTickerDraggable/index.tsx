@@ -33,6 +33,7 @@ export const SmartTickerDraggable: React.FC<SmartTickerDraggableProps> = ({
   multiLine = 0,
   infiniteScrollView = true,
   disableSelect = false,
+  disableDragging = false,
   forwardedRef
 }) => {
   smart = smart && !autoFill
@@ -266,10 +267,10 @@ export const SmartTickerDraggable: React.FC<SmartTickerDraggableProps> = ({
       <div
         ref={wrapperRef}
         data-testid={'ticker-wrapper'}
-        className={styles['drag-wrapper']}
+        className={`${styles['drag-wrapper']} ${disableDragging ? styles['no-dragging'] : ''}`}
         style={wrapperStyle}
-        onMouseDown={onMouseDownHandler}
-        onTouchStart={onTouchStartHandler}
+        {...(!disableDragging && { onMouseDown: onMouseDownHandler })}
+        {...(!disableDragging && { onTouchStart: onTouchStartHandler })}
       >
         <div
           key={'ticker-1'}
