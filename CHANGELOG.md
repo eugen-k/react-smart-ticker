@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.5.0](https://github.com/eugen-k/react-smart-ticker/compare/v1.4.0...v1.5.0) (2025-05-13)
+
+
+### Features
+
+* add a dragging disabling possibility ([d8e45ee](https://github.com/eugen-k/react-smart-ticker/commit/d8e45ee7944a47b7309ec8ef60258faaf822afc2))
+* add a dragging disabling possibility ([0b9f87f](https://github.com/eugen-k/react-smart-ticker/commit/0b9f87ff39bdbe8e3f6ca6a8e84d9bec3e16c065))
+* add speed back ([8073747](https://github.com/eugen-k/react-smart-ticker/commit/8073747413974378d2782a5546291c23e1e781ce))
+* add speed back ([1167ad4](https://github.com/eugen-k/react-smart-ticker/commit/1167ad40ff1b343dbb1ed0800b5b9bf303ba27fc))
+
+
+### Bug Fixes
+
+* CI action ([710e9d4](https://github.com/eugen-k/react-smart-ticker/commit/710e9d4bec57fcf8c0e5b75cb8fbdc2b916cb783))
+
 ## [1.4.0](https://github.com/eugen-k/react-smart-ticker/compare/v1.3.2...v1.4.0) (2024-11-17)
 
 
