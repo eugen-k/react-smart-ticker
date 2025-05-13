@@ -23,6 +23,7 @@ export const SmartTickerDraggable: React.FC<SmartTickerDraggableProps> = ({
   playOnHover = false,
   delay = 0,
   delayBack = 500,
+  speedBack = 200,
   iterations = 'infinite',
   recalcDeps = [],
   style,
@@ -64,10 +65,9 @@ export const SmartTickerDraggable: React.FC<SmartTickerDraggableProps> = ({
     recalcDeps
   })
 
-  const canBeAnimated = useMemo(
-    () => (!isChildFit || (!smart && isChildFit && infiniteScrollView)) && isCalculated,
-    [isChildFit, smart, isChildFit, infiniteScrollView, isCalculated]
-  )
+  const canBeAnimated = useMemo(() => {
+    return !isChildFit || (!smart && isChildFit && infiniteScrollView)
+  }, [isChildFit, smart, infiniteScrollView])
 
   const {
     onMouseDownHandler,
@@ -75,6 +75,7 @@ export const SmartTickerDraggable: React.FC<SmartTickerDraggableProps> = ({
     onContainerHoverHandler,
     wrapperRef,
     isPaused,
+    isAnimating,
     onVisibilityChangeHandler
   } = useTickerAnimation({
     isCalculated,
@@ -85,6 +86,7 @@ export const SmartTickerDraggable: React.FC<SmartTickerDraggableProps> = ({
     delay,
     delayBack,
     speed,
+    speedBack,
     canBeAnimated,
     direction,
     rtl,
@@ -127,6 +129,7 @@ export const SmartTickerDraggable: React.FC<SmartTickerDraggableProps> = ({
       (direction === 'left' || (direction === 'right' && rtl)) &&
       isText &&
       isPaused &&
+      !isAnimating &&
       !pauseOnHover &&
       !isDragging &&
       !isChildFit &&
@@ -144,6 +147,7 @@ export const SmartTickerDraggable: React.FC<SmartTickerDraggableProps> = ({
       direction === 'top' &&
       isPaused &&
       isText &&
+      !isAnimating &&
       !pauseOnHover &&
       !isDragging &&
       !isChildFit &&

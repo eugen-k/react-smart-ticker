@@ -8,7 +8,7 @@ import {
   useRef,
   useState
 } from 'react'
-import { Animation } from '../helpers/animation'
+import { Animation, AnimationKey } from '../helpers/animation'
 import { Directions, ElRect, Iterations, SmartTickerHandle } from '../types/smartTickerTypes'
 
 type UseTickerAnimationHookParams = {
@@ -21,6 +21,7 @@ type UseTickerAnimationHookParams = {
   delay: number
   delayBack: number
   speed: number
+  speedBack: number
   canBeAnimated: boolean
   iterations: Iterations
   infiniteScrollView: boolean
@@ -38,6 +39,7 @@ type UseTickerAnimationHookReturn = {
   onTouchStartHandler: (e: React.TouchEvent) => void
   onContainerHoverHandler: (hoverState: boolean) => void
   isPaused: boolean
+  isAnimating: boolean
   wrapperRef: React.RefObject<HTMLDivElement> | null
   animation: Animation | null
 }
@@ -50,6 +52,7 @@ export const useTickerAnimation = ({
   delay,
   delayBack,
   speed,
+  speedBack,
   direction,
   rtl,
   infiniteScrollView,
@@ -68,17 +71,30 @@ export const useTickerAnimation = ({
   const wrapperRef = useRef<HTMLDivElement>(null)
 
   const [isPaused, setIsPaused] = useState(true)
+  const [isAnimating, setIsAnimating] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
 
   useImperativeHandle(forwardedRef, () => ({
     play: () => {
-      animationRef.current.play()
+      setIsPaused(false)
+      setIsAnimating(true)
+      animationRef.current.play(() => {
+        setIsPaused(true)
+        setIsAnimating(false)
+      })
     },
     pause: () => {
       animationRef.current.pause()
     },
     reset: (isPaused = true) => {
-      animationRef.current.backToStartPosition(isPaused)
+      setIsPaused(false)
+      setIsAnimating(true)
+      animationRef.current.backToStartPosition(isPaused, () => {
+        setIsPaused(isPaused)
+        if (isPaused) {
+          setIsAnimating(false)
+        }
+      })
     }
   }))
 
@@ -93,7 +109,12 @@ export const useTickerAnimation = ({
       removeEventListener('mouseup', mouseUpHandler)
       removeEventListener('touchmove', touchListener)
       removeEventListener('touchend', touchEndHandler)
-      animationRef.current.backToStartPosition()
+      setIsPaused(false)
+      setIsAnimating(true)
+      animationRef.current.backToStartPosition(true, () => {
+        setIsPaused(true)
+        setIsAnimating(false)
+      })
     }
   }, [])
 
@@ -109,10 +130,10 @@ export const useTickerAnimation = ({
         infiniteScrollView,
         startPosition: 0,
         speed,
+        speedBack,
         delay,
         delayBack,
         direction,
-        playOnHover,
         rtl,
         iterations,
         play: isPaused,
@@ -122,18 +143,21 @@ export const useTickerAnimation = ({
             // isPaused state will be updated while onMouseOut
           } else {
             setIsPaused(true)
+            setIsAnimating(false)
           }
         }
       })
 
       if (canBeAnimated && (!playOnHover || pauseOnHover)) {
         setIsPaused(false)
+        setIsAnimating(true)
       }
     }
 
     return () => {
       !!timeoutId && clearTimeout(timeoutId)
       setIsPaused(true)
+      setIsAnimating(false)
     }
   }, [
     isCalculated,
@@ -158,7 +182,9 @@ export const useTickerAnimation = ({
       if (playOnHover) {
         animationRef.current.setCounter(0)
         // move back to the start position if the playOnHover option is true
-        animationRef.current.backToStartPosition()
+        animationRef.current.backToStartPosition(true, () => {
+          setIsAnimating(false)
+        })
       }
     } else if (canBeAnimated) {
       if (wrapperRef.current) {
@@ -166,8 +192,9 @@ export const useTickerAnimation = ({
       }
 
       animationRef.current.play()
+      setIsAnimating(true)
     }
-  }, [isPaused])
+  }, [isPaused, canBeAnimated])
 
   const onContainerHoverHandler = useCallback(
     (hovered: boolean) => {
@@ -177,6 +204,10 @@ export const useTickerAnimation = ({
   )
 
   useEffect(() => {
+    if (animationRef.current.getIsDragging()) {
+      return
+    }
+
     if (playOnHover) {
       if (isHovered) {
         setIsPaused(false)
@@ -233,7 +264,7 @@ export const useTickerAnimation = ({
             Number(wrapperRef.current!.style[axis === 'x' ? 'left' : 'top'].replace('px', '')) -
             (axis === 'x' ? deltaX : deltaY) +
             'px' // update position
-          animationRef.current.alignPosition()
+          animationRef.current.alignPosition(AnimationKey.Dragging)
         } else {
           const curPos = Number(
             wrapperRef.current!.style[axis === 'x' ? 'left' : 'top'].replace('px', '')
@@ -285,9 +316,15 @@ export const useTickerAnimation = ({
           !playOnHover &&
           (iterations === 'infinite' || animationRef.current.getCounter() < iterations)
         ) {
-          animationRef.current.play()
+          setIsPaused(false)
+          animationRef.current.play(() => {
+            setIsPaused(true)
+          })
         } else {
-          animationRef.current.backToStartPosition()
+          setIsPaused(false)
+          animationRef.current.backToStartPosition(true, () => {
+            setIsPaused(true)
+          })
         }
         removeEventListener('mousemove', dragListener)
         removeEventListener('mouseup', mouseUpHandler)
@@ -326,9 +363,15 @@ export const useTickerAnimation = ({
           !playOnHover &&
           (iterations === 'infinite' || animationRef.current.getCounter() < iterations)
         ) {
-          animationRef.current.play()
+          setIsPaused(false)
+          animationRef.current.play(() => {
+            setIsPaused(true)
+          })
         } else {
-          animationRef.current.backToStartPosition()
+          setIsPaused(false)
+          animationRef.current.backToStartPosition(true, () => {
+            setIsPaused(true)
+          })
         }
         removeEventListener('touchmove', touchListener)
         removeEventListener('touchend', touchEndHandler)
@@ -347,6 +390,7 @@ export const useTickerAnimation = ({
     onContainerHoverHandler,
     onVisibilityChangeHandler,
     isPaused,
+    isAnimating,
     wrapperRef,
     animation: animationRef.current
   }

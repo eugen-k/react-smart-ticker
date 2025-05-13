@@ -112,7 +112,8 @@ export default App
 | `waitForFonts`       | `boolean`                                      | No       | `true`       | Run the calculation only when fonts are loaded                                                                                                                    |
 | `speed`              | `number`                                       | No       | 60           | Scrolling speed in pixels per second                                                                                                                              |
 | `delay`              | `number`                                       | No       | 0            | Delay before starting the animation (in milliseconds)                                                                                                             |
-| ⚠️ `delayBack`       | `number`                                       | No       | 0            | Delay before returning to a start position (in milliseconds). Requires _infiniteScrollView_ prop to be **false** **⚠️ _SmartTickerDraggable_ prop only**          |
+| ⚠️ `delayBack`       | `number`                                       | No       | 0            | Delay before back animation (in milliseconds). Requires _infiniteScrollView_ prop to be **false** **⚠️ _SmartTickerDraggable_ prop only**                         |
+| ⚠️ `speedBack`       | `number`                                       | No       | 200          | Scrolling speed in pixels per second for back animation. Requires _infiniteScrollView_ prop to be **false** **⚠️ _SmartTickerDraggable_ prop only**               |
 | `iterations`         | `number` \| `"infinite"`                       | No       | `"infinite"` | Amount of animation iterations second                                                                                                                             |
 | `infiniteScrollView` | `boolean`                                      | No       | `true`       | Determines if the content will repeated one by one during scrolling animation                                                                                     |
 | `autoFill`           | `boolean`                                      | No       | `false`      | Flag to determine if ticker content should be copied and fill in all the container's space                                                                        |
@@ -138,7 +139,7 @@ To enable control over play and pause, react-smart-ticker uses forwardRef. The c
 
 - **play()**: Starts the ticker animation.
 - **pause()**: Pauses the ticker animation.
-- **reset(isPaused: boolean)**: Resets the ticker animation. `isPaused` flag sets the state of the animation after resetting.
+- **reset(isPaused: boolean)**: Resets the ticker animation. `isPaused` (**true** by default) flag sets the animation state after resetting.
 
 ### Usage
 

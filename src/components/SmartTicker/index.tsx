@@ -123,7 +123,9 @@ const SmartTicker: React.FC<SmartTickerProps> = ({
 
   const [isPaused, setIsPaused] = useState(true)
 
-  const canBeAnimated = !(smart && isChildFit)
+  const canBeAnimated = useMemo(() => {
+    return !(smart && isChildFit)
+  }, [isChildFit, smart])
 
   useImperativeHandle(forwardedRef, () => ({
     play: () => {
