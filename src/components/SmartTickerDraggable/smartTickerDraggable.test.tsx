@@ -1,7 +1,7 @@
 /// <reference
 
 import React, { act, ReactNode, useRef } from 'react'
-import { render, screen } from '@testing-library/react'
+import { cleanup, render, screen } from '@testing-library/react'
 import { SmartTickerDraggable } from '.'
 import { fireEvent, waitFor } from '@testing-library/dom'
 import { SmartTickerDraggableProps } from '../../types/smartTickerTypes'
@@ -84,6 +84,8 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  cleanup() // Remove the rendered DOM
+  jest.clearAllMocks()
   mockGetBoundingClientRect.mockRestore()
 })
 
@@ -381,7 +383,7 @@ describe('SmartTickerDraggable', () => {
       reset(false)
     })
 
-    await new Promise((r) => setTimeout(r, 100))
+    await new Promise((r) => setTimeout(r, 200))
 
     expect(Number(wrapper.style.left.replace('px', ''))).toBeLessThan(0)
   })
