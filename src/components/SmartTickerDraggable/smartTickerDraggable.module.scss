@@ -7,11 +7,14 @@
 .drag-wrapper {
   display: flex;
   position: relative;
-  cursor: grab;
   flex-wrap: nowrap;
   //text-size-adjust: none;
   touch-action: none;
   -webkit-touch-action: none;
+
+  &:not(.no-dragging) {
+    cursor: grab;
+  }
 
   &.dragging {
     cursor: grabbing;
