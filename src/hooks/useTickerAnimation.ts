@@ -111,10 +111,14 @@ export const useTickerAnimation = ({
       removeEventListener('touchend', touchEndHandler)
       setIsPaused(false)
       setIsAnimating(true)
-      animationRef.current.backToStartPosition(true, () => {
-        setIsPaused(true)
-        setIsAnimating(false)
-      })
+      animationRef.current.backToStartPosition(
+        true,
+        () => {
+          setIsPaused(true)
+          setIsAnimating(false)
+        },
+        true
+      )
     }
   }, [])
 
@@ -163,6 +167,8 @@ export const useTickerAnimation = ({
     isCalculated,
     delay,
     delayBack,
+    speed,
+    speedBack,
     iterations,
     infiniteScrollView,
     direction,
