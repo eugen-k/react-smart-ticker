@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/eugen-k/react-smart-ticker/compare/v1.5.0...v1.5.1) (2025-05-15)
+
+
+### Bug Fixes
+
+* start position ([f6e9f0d](https://github.com/eugen-k/react-smart-ticker/commit/f6e9f0d1c1fb931e5c6780743a767bbc2d42cc26))
+
 ## [1.5.0](https://github.com/eugen-k/react-smart-ticker/compare/v1.4.0...v1.5.0) (2025-05-13)
 
 
