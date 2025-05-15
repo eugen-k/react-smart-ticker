@@ -141,7 +141,7 @@ export const SmartTickerDraggable: React.FC<SmartTickerDraggableProps> = ({
     } else {
       return false
     }
-  }, [axis, isText, isPaused, pauseOnHover, isDragging, isChildFit, isCalculated])
+  }, [axis, isText, isPaused, pauseOnHover, isDragging, isChildFit, isCalculated, isAnimating])
 
   const isColumnEllipses = useMemo(() => {
     if (
@@ -160,7 +160,17 @@ export const SmartTickerDraggable: React.FC<SmartTickerDraggableProps> = ({
     } else {
       return false
     }
-  }, [axis, isText, isPaused, pauseOnHover, isDragging, multiLine, isChildFit, isCalculated])
+  }, [
+    axis,
+    isText,
+    isPaused,
+    pauseOnHover,
+    isDragging,
+    multiLine,
+    isChildFit,
+    isCalculated,
+    isAnimating
+  ])
 
   const displayValue = useMemo(() => {
     if (isRowEllipses) {

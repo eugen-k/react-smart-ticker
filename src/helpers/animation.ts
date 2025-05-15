@@ -345,7 +345,7 @@ export class Animation {
       this.play()
     }
   }
-
+  // MARK: init
   init({
     tickerEl,
     wrapperEl,
@@ -382,11 +382,18 @@ export class Animation {
       this.wrapperEl!.current!.style[this.axis === 'x' ? 'left' : 'top'] = startPosition + 'px'
     }
 
+    // Set initial position of the perpendicular axis to 0
+    if (this.axis === 'x') {
+      this.wrapperEl!.current!.style.top = 0 + 'px'
+    } else {
+      this.wrapperEl!.current!.style.left = 0 + 'px'
+    }
+
     this.isInited = true
   }
 
   // MARK: backToStartPosition
-  backToStartPosition(willPause: boolean = true, onEnd?: () => void) {
+  backToStartPosition(willPause: boolean = true, onEnd?: () => void, immediately: boolean = false) {
     if (!this.isInited || !this.wrapperEl?.current?.style) return
 
     this.isInnerPaused = false
@@ -395,7 +402,11 @@ export class Animation {
 
     this.isBackAnimation = true
 
+    const origSpeedBack = this.speedBack
+    this.speedBack = immediately ? 1000 : this.speedBack
+
     this.animate(AnimationKey.Back, () => {
+      this.speedBack = origSpeedBack
       this.isBackAnimation = false
       this.isPaused = true
       this.isInnerPaused = false
