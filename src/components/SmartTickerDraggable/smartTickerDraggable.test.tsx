@@ -616,4 +616,104 @@ describe('SmartTickerDraggable', () => {
 
     expect(Math.abs(Number(wrapper.style.left.replace('px', '')))).toBeGreaterThan(curPos)
   })
+
+  test('stops animation after 2 iterations', async () => {
+    jest.resetAllMocks()
+
+    mockGetBoundingClientRect
+      // container rect
+      .mockReturnValueOnce({
+        width: 200,
+        height: 200
+      })
+      // ticker rect
+      .mockReturnValueOnce({
+        width: 250,
+        height: 250
+      })
+
+    await act(async () => {
+      render(
+        <SmartTickerDraggable
+          smart={false}
+          iterations={2}
+          infiniteScrollView={false}
+          speed={1000}
+          speedBack={1000}
+          delayBack={200}
+          direction='left'
+        >
+          Test
+        </SmartTickerDraggable>
+      )
+    })
+
+    const wrapper = screen.getByTestId('ticker-wrapper')
+
+    // Wait for the first iteration
+    await new Promise((r) => setTimeout(r, 100))
+
+    const positionAfterFirstIteration = Number(wrapper.style.left.replace('px', ''))
+
+    // Wait for the second iteration
+    await new Promise((r) => setTimeout(r, 700))
+
+    const positionAfterSecondIteration = Number(wrapper.style.left.replace('px', ''))
+
+    expect(positionAfterFirstIteration).toBeLessThan(0) // Ensure it moved
+    expect(positionAfterSecondIteration).toBe(0) // Ensure it stops after 2 iterations
+  })
+
+  test('does not start animation when iterations is set to 0', async () => {
+    jest.resetAllMocks()
+
+    mockGetBoundingClientRect
+      // container rect
+      .mockReturnValueOnce({
+        width: 200,
+        height: 200
+      })
+      // ticker rect
+      .mockReturnValueOnce({
+        width: 250,
+        height: 250
+      })
+
+    await act(async () => {
+      render(
+        <SmartTickerDraggable
+          smart={false}
+          iterations={0}
+          infiniteScrollView={false}
+          direction='left'
+        >
+          Test
+        </SmartTickerDraggable>
+      )
+    })
+
+    const wrapper = screen.getByTestId('ticker-wrapper')
+
+    await new Promise((r) => setTimeout(r, 500))
+
+    expect(Number(wrapper.style.left.replace('px', ''))).toBe(0) // Ensure no movement
+  })
+
+  test('disables dragging when disableDragging is true', async () => {
+    await act(async () => {
+      render(
+        <SmartTickerDraggable smart={false} disableDragging direction='left'>
+          Test
+        </SmartTickerDraggable>
+      )
+    })
+
+    const wrapper = screen.getByTestId('ticker-wrapper')
+
+    fireEvent.mouseDown(wrapper, { clientX: 0, clientY: 0 })
+    fireEvent.mouseMove(wrapper, { clientX: 20, clientY: 0 })
+    fireEvent.mouseUp(wrapper)
+
+    expect(Number(wrapper.style.left.replace('px', ''))).toBe(0) // Ensure no dragging occurred
+  })
 })
