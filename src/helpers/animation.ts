@@ -21,8 +21,7 @@ type InitParams = {
   infiniteScrollView: boolean
   rtl: boolean
   iterations: Iterations
-  play: boolean
-  onAnimationEnd?: () => void
+  onIterationsEnd?: () => void
 }
 
 export class Animation {
@@ -38,25 +37,24 @@ export class Animation {
   private infiniteScrollView: boolean
   private speed = 50
   private speedBack = 200
-  private isInnerPaused = false
   private isPausedByVisibility = false
-  private isPaused = true
   private delay: number
   private delayBack: number
   private iterations: Iterations
   private isInited: boolean = false
-  private onAnimationEnd: (() => void) | null
-  private isRestartAnimation: boolean = false
-  private isBackAnimation: boolean = false
+  private onIterationsEnd: (() => void) | null
   private animationStartPos: number
   private reqAnimFrameKey: number | null = null
   private animationState: AnimationKey | null = null
+  private timeoutIds: number[] = [] // Track all setTimeout IDs
 
   private draw(fraction: number) {
     if (this.wrapperEl?.current === null) return
 
     const step =
-      (this.isRestartAnimation || this.isBackAnimation ? this.speedBack : this.speed) *
+      ([AnimationKey.Back, AnimationKey.Restart].includes(this.animationState!)
+        ? this.speedBack
+        : this.speed) *
       fraction *
       this.getSign()
 
@@ -85,26 +83,17 @@ export class Animation {
     const _animate = (time: number) => {
       if (!this.prevTime) this.prevTime = time
 
-      if (
-        !this.isPaused &&
-        !this.isInnerPaused &&
-        (this.iterations === 'infinite' || this.iterationCounter < this.iterations)
-      ) {
-        const fraction = Math.min((time - this.prevTime) / 1000, 0.1)
-        this.prevTime = time
-        this.draw(fraction)
+      const fraction = Math.min((time - this.prevTime) / 1000, 0.1)
+      this.prevTime = time
+      this.draw(fraction)
 
-        if (this.alignPosition(key, onEnd)) {
-          this.reqAnimFrameKey = requestAnimationFrame(_animate.bind(this))
-        } else {
-          this.stopAnimation()
-        }
-      } else {
-        this.stopAnimation()
+      if (this.alignPosition(key, onEnd)) {
+        this.reqAnimFrameKey = requestAnimationFrame(_animate.bind(this))
       }
     }
     requestAnimationFrame(_animate.bind(this))
   }
+
   // MARK: stopAnimation
   private stopAnimation() {
     if (this.reqAnimFrameKey) {
@@ -113,11 +102,20 @@ export class Animation {
     }
   }
 
+  private clearTimeouts() {
+    // Clear all timeouts
+    this.timeoutIds.forEach((id) => clearTimeout(id))
+    this.timeoutIds = []
+  }
+
   // MARK: alignPosition
   alignPosition(key: AnimationKey, onEnd?: () => void): boolean {
     if (!this.isInited) return false
 
-    if (this.infiniteScrollView && !this.isRestartAnimation && !this.isBackAnimation) {
+    if (
+      this.infiniteScrollView &&
+      (key === AnimationKey.Forward || key === AnimationKey.Dragging)
+    ) {
       switch (this.axis) {
         case 'x': {
           const wrapperX = Number(this.wrapperEl?.current?.style.left.replace('px', ''))
@@ -164,26 +162,19 @@ export class Animation {
       }
 
       if (this.iterations !== 'infinite' && this.iterationCounter >= this.iterations) {
-        if (typeof this.onAnimationEnd === 'function') {
-          this.onAnimationEnd()
+        this.stopAnimation()
+
+        if (onEnd) {
+          onEnd()
         }
 
-        // reset animation state
-        this.isInnerPaused = false
+        if (typeof this.onIterationsEnd === 'function') {
+          this.onIterationsEnd()
+        }
+
         return false
       }
-    } else if (!this.isDragging && !this.isBackAnimation && !this.isRestartAnimation) {
-      // min "top" or "left" position depending on the direction
-      const minPos: { [Property in typeof this.axis]: { [Property in Directions]?: number } } = {
-        y: {
-          top: 0,
-          bottom: 0
-        },
-        x: {
-          left: 0,
-          right: 0
-        }
-      }
+    } else if (key === AnimationKey.Forward) {
       // max "top" or "left" position depending on the direction
       const maxPos: { [Property in typeof this.axis]: { [Property in Directions]?: number } } = {
         y: {
@@ -197,73 +188,71 @@ export class Animation {
       }
 
       const newPos = Math.abs(
-        Math.floor(
-          Number(
-            this.wrapperEl?.current?.style?.[this.axis === 'x' ? 'left' : 'top']?.replace(
-              'px',
-              ''
-            ) || 0
-          )
+        Number(
+          this.wrapperEl?.current?.style?.[this.axis === 'x' ? 'left' : 'top']?.replace('px', '') ||
+            0
         )
       )
 
-      if (
-        newPos < minPos[this.axis][this.direction]! ||
-        newPos > maxPos[this.axis][this.direction]!
-      ) {
+      if (newPos > maxPos[this.axis][this.direction]!) {
         this.iterationCounter++
-        this.isInnerPaused = true
+        this.stopAnimation()
 
-        setTimeout(() => {
-          this.restartLoop()
-        }, this.delayBack)
+        this.timeoutIds.push(
+          setTimeout(() => {
+            this.restartLoop()
+          }, this.delayBack) as unknown as number
+        )
 
         return false
       }
-    } else if (this.isRestartAnimation) {
+    } else if (key === AnimationKey.Restart) {
       const newPos = Number(
         this.wrapperEl!.current!.style[this.axis === 'x' ? 'left' : 'top'].replace('px', '')
       )
 
       if (newPos * -this.getSign() >= 0) {
-        this.isInnerPaused = true
-        this.isRestartAnimation = false
+        this.stopAnimation()
 
         requestAnimationFrame(() => {
           this.wrapperEl!.current!.style[this.axis === 'x' ? 'left' : 'top'] = 0 + 'px'
 
           if (this.iterations === 'infinite' || this.iterationCounter < this.iterations) {
-            setTimeout(() => {
-              this.isInnerPaused = false
-              this.animate(AnimationKey.Forward)
-            }, this.delay)
+            this.timeoutIds.push(
+              setTimeout(() => {
+                this.animate(AnimationKey.Forward)
+              }, this.delay) as unknown as number
+            )
           } else {
-            // reset animation state
-            this.isInnerPaused = false
-            if (typeof this.onAnimationEnd === 'function') {
-              this.onAnimationEnd()
+            if (typeof this.onIterationsEnd === 'function') {
+              if (onEnd) {
+                onEnd()
+              }
+
+              this.onIterationsEnd()
             }
           }
         })
 
         return false
       }
-    } else if (this.isBackAnimation) {
+    } else if (key === AnimationKey.Back) {
       const newPos = Number(
         this.wrapperEl!.current!.style[this.axis === 'x' ? 'left' : 'top'].replace('px', '')
       )
 
       if (newPos * -this.getSign() >= 0) {
-        this.isBackAnimation = false
-        this.isInnerPaused = true
+        this.stopAnimation()
+        this.animationState = null
 
         requestAnimationFrame(() => {
           this.wrapperEl!.current!.style[this.axis === 'x' ? 'left' : 'top'] = 0 + 'px'
-
-          if (typeof onEnd !== 'undefined') {
-            onEnd()
-          }
         })
+
+        if (onEnd) {
+          onEnd()
+        }
+
         return false
       }
     }
@@ -273,8 +262,6 @@ export class Animation {
   private restartLoop = () => {
     const restart = () => {
       if (this.wrapperEl.current) {
-        this.isRestartAnimation = true
-        this.isInnerPaused = false
         this.animate(AnimationKey.Restart)
       }
     }
@@ -295,14 +282,17 @@ export class Animation {
   }
 
   pause() {
-    this.isPaused = true
+    if (!this.isInited) return
+
     this.isPausedByVisibility = false
+
+    this.stopAnimation()
   }
 
   setIsDragging(drag: boolean) {
     // the animation should be stopped while dragging
     if (drag) {
-      this.isPaused = true
+      this.stopAnimation()
     }
     this.isDragging = drag
   }
@@ -315,30 +305,39 @@ export class Animation {
   play(onEnd?: () => void) {
     if (!this.isInited || !this.wrapperEl?.current?.style) return
 
-    this.isPaused = false
     this.isPausedByVisibility = false
+    this.clearTimeouts()
+
+    // If the animation is back already, we need to restart it
+    if (this.animationState === AnimationKey.Back) {
+      this.animationState = AnimationKey.Restart
+    }
 
     if (!this.isDragging) {
-      setTimeout(
-        () => {
-          this.animate(this.animationState || AnimationKey.Forward, () => {
-            if (typeof onEnd === 'function') {
-              onEnd()
-            }
-          })
-        },
-        this.animationState ? 0 : this.delay
-      )
+      this.timeoutIds.push(
+        setTimeout(
+          () => {
+            this.animate(this.animationState || AnimationKey.Forward, () => {
+              if (typeof onEnd === 'function') {
+                onEnd()
+              }
+            })
+          },
+          this.animationState ? 0 : this.delay
+        ) as unknown as number
+      ) // Cast to number
     }
   }
 
   toggleByVisibility() {
     if (!this.isInited) return
 
-    if (!this.isPaused && document?.visibilityState === 'hidden') {
+    if (document?.visibilityState === 'hidden') {
       // Pausing the animation due to visibility change
-      this.isPaused = true
-      this.isPausedByVisibility = true
+      if (this.animationState) {
+        this.isPausedByVisibility = true
+      }
+      this.stopAnimation()
     } else if (this.isPausedByVisibility && document?.visibilityState === 'visible') {
       // Resuming animation previously paused by visibility change
       this.prevTime = performance.now() // Reset the timer to avoid animation jumps
@@ -359,17 +358,15 @@ export class Animation {
     infiniteScrollView,
     direction,
     iterations,
-    play,
-    onAnimationEnd
+    onIterationsEnd
   }: InitParams) {
     this.tickerEl = tickerEl
     this.wrapperEl = wrapperEl
     this.axis = direction === 'left' || direction === 'right' ? 'x' : 'y'
     this.speed = speed
     this.speedBack = speedBack * -1
-    this.isPaused = play
     this.iterations = iterations
-    this.onAnimationEnd = onAnimationEnd || null
+    this.onIterationsEnd = onIterationsEnd || null
     this.iterationCounter = 0
     this.infiniteScrollView = infiniteScrollView
     this.tickerRect = tickerRect
@@ -377,6 +374,10 @@ export class Animation {
     this.delay = delay
     this.delayBack = delayBack
     this.direction = direction
+
+    if (this.iterations === 0) {
+      return
+    }
 
     if (startPosition) {
       this.wrapperEl!.current!.style[this.axis === 'x' ? 'left' : 'top'] = startPosition + 'px'
@@ -396,27 +397,20 @@ export class Animation {
   backToStartPosition(willPause: boolean = true, onEnd?: () => void, immediately: boolean = false) {
     if (!this.isInited || !this.wrapperEl?.current?.style) return
 
-    this.isInnerPaused = false
-    this.isRestartAnimation = false
-    this.isPaused = false
-
-    this.isBackAnimation = true
+    this.clearTimeouts()
 
     const origSpeedBack = this.speedBack
     this.speedBack = immediately ? 1000 : this.speedBack
 
     this.animate(AnimationKey.Back, () => {
       this.speedBack = origSpeedBack
-      this.isBackAnimation = false
-      this.isPaused = true
-      this.isInnerPaused = false
-      this.animationState = null
 
       if (!willPause) {
-        setTimeout(() => {
-          this.isPaused = false
-          this.animate(AnimationKey.Forward)
-        }, this.delay)
+        this.timeoutIds.push(
+          setTimeout(() => {
+            this.animate(AnimationKey.Forward)
+          }, this.delay) as unknown as number
+        ) // Cast to number
       } else {
         if (typeof onEnd === 'function') {
           onEnd()
