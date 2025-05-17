@@ -140,8 +140,7 @@ export const useTickerAnimation = ({
         direction,
         rtl,
         iterations,
-        play: isPaused,
-        onAnimationEnd: () => {
+        onIterationsEnd: () => {
           if (isHovered && playOnHover) {
             animationRef.current.pause()
             // isPaused state will be updated while onMouseOut
@@ -197,7 +196,10 @@ export const useTickerAnimation = ({
         wrapperRef.current.style.willChange = axis === 'x' ? 'left' : 'top'
       }
 
-      animationRef.current.play()
+      animationRef.current.play(() => {
+        setIsPaused(true)
+        setIsAnimating(false)
+      })
       setIsAnimating(true)
     }
   }, [isPaused, canBeAnimated])
@@ -323,13 +325,17 @@ export const useTickerAnimation = ({
           (iterations === 'infinite' || animationRef.current.getCounter() < iterations)
         ) {
           setIsPaused(false)
+          setIsAnimating(true)
           animationRef.current.play(() => {
             setIsPaused(true)
+            setIsAnimating(false)
           })
         } else {
           setIsPaused(false)
+          setIsAnimating(true)
           animationRef.current.backToStartPosition(true, () => {
             setIsPaused(true)
+            setIsAnimating(false)
           })
         }
         removeEventListener('mousemove', dragListener)
@@ -370,13 +376,17 @@ export const useTickerAnimation = ({
           (iterations === 'infinite' || animationRef.current.getCounter() < iterations)
         ) {
           setIsPaused(false)
+          setIsAnimating(true)
           animationRef.current.play(() => {
             setIsPaused(true)
+            setIsAnimating(false)
           })
         } else {
           setIsPaused(false)
+          setIsAnimating(true)
           animationRef.current.backToStartPosition(true, () => {
             setIsPaused(true)
+            setIsAnimating(false)
           })
         }
         removeEventListener('touchmove', touchListener)
