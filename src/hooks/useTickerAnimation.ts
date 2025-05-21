@@ -84,6 +84,8 @@ export const useTickerAnimation = ({
       })
     },
     pause: () => {
+      setIsPaused(true)
+      setIsAnimating(false)
       animationRef.current.pause()
     },
     reset: (isPaused = true) => {
@@ -100,15 +102,15 @@ export const useTickerAnimation = ({
 
   let dragListener: EventListener
   let touchListener: EventListener
-  let touchEndHandler: () => void
-  let mouseUpHandler: () => void
+  let touchEndHandler: EventListener
+  let mouseUpHandler: EventListener
 
   useEffect(() => {
     return () => {
       removeEventListener('mousemove', dragListener)
-      removeEventListener('mouseup', mouseUpHandler)
+      removeEventListener('mouseup', mouseUpHandler as EventListener)
       removeEventListener('touchmove', touchListener)
-      removeEventListener('touchend', touchEndHandler)
+      removeEventListener('touchend', touchEndHandler as EventListener)
       setIsPaused(false)
       setIsAnimating(true)
       animationRef.current.backToStartPosition(
@@ -154,6 +156,10 @@ export const useTickerAnimation = ({
       if (canBeAnimated && (!playOnHover || pauseOnHover)) {
         setIsPaused(false)
         setIsAnimating(true)
+        animationRef.current.play(() => {
+          setIsPaused(true)
+          setIsAnimating(false)
+        })
       }
     }
 
@@ -186,21 +192,11 @@ export const useTickerAnimation = ({
       // reset iterationCounter if playOnHover option is true, to play the animation again once hovered
       if (playOnHover) {
         animationRef.current.setCounter(0)
-        // move back to the start position if the playOnHover option is true
-        animationRef.current.backToStartPosition(true, () => {
-          setIsAnimating(false)
-        })
       }
     } else if (canBeAnimated) {
       if (wrapperRef.current) {
         wrapperRef.current.style.willChange = axis === 'x' ? 'left' : 'top'
       }
-
-      animationRef.current.play(() => {
-        setIsPaused(true)
-        setIsAnimating(false)
-      })
-      setIsAnimating(true)
     }
   }, [isPaused, canBeAnimated])
 
@@ -219,16 +215,33 @@ export const useTickerAnimation = ({
     if (playOnHover) {
       if (isHovered) {
         setIsPaused(false)
+        setIsAnimating(true)
+        animationRef.current.play(() => {
+          setIsPaused(true)
+          setIsAnimating(false)
+        })
       } else {
-        setIsPaused(true)
+        setIsPaused(false)
+        setIsAnimating(true)
+        animationRef.current.backToStartPosition(true, () => {
+          setIsPaused(true)
+          setIsAnimating(false)
+        })
       }
     }
 
     if (pauseOnHover) {
       if (isHovered) {
         setIsPaused(true)
+        setIsAnimating(false)
+        animationRef.current.pause()
       } else {
         setIsPaused(false)
+        setIsAnimating(true)
+        animationRef.current.play(() => {
+          setIsPaused(true)
+          setIsAnimating(false)
+        })
       }
     }
   }, [isHovered])
@@ -308,7 +321,10 @@ export const useTickerAnimation = ({
 
     addEventListener(
       'mouseup',
-      (mouseUpHandler = () => {
+      (mouseUpHandler = (e: Event) => {
+        const mouseEvent = e as unknown as MouseEvent
+        mouseEvent.preventDefault()
+
         if (typeof onMouseUp === 'function') {
           onMouseUp()
         }
@@ -339,7 +355,7 @@ export const useTickerAnimation = ({
           })
         }
         removeEventListener('mousemove', dragListener)
-        removeEventListener('mouseup', mouseUpHandler)
+        removeEventListener('mouseup', mouseUpHandler as EventListener)
       })
     )
   }
@@ -359,7 +375,10 @@ export const useTickerAnimation = ({
 
     addEventListener(
       'touchend',
-      (touchEndHandler = () => {
+      (touchEndHandler = (e: Event) => {
+        const touchEvent = e as unknown as TouchEvent
+        touchEvent.preventDefault()
+
         animationRef.current.setIsDragging(false)
 
         if (typeof onMouseUp === 'function') {
