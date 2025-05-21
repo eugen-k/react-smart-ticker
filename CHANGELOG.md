@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.3](https://github.com/eugen-k/react-smart-ticker/compare/v1.5.2...v1.5.3) (2025-05-21)
+
+
+### Bug Fixes
+
+* improve animation state management and event handling ([d659163](https://github.com/eugen-k/react-smart-ticker/commit/d659163dbf8ddf5d25c04b5aad8529c48fb12323))
+* improve animation state management and event handling ([623fb74](https://github.com/eugen-k/react-smart-ticker/commit/623fb74d1ecdf3b2909052315d511314aeaf20bd))
+
 ## [1.5.2](https://github.com/eugen-k/react-smart-ticker/compare/v1.5.1...v1.5.2) (2025-05-17)
 
 
