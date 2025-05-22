@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.4](https://github.com/eugen-k/react-smart-ticker/compare/v1.5.3...v1.5.4) (2025-05-22)
+
+
+### Bug Fixes
+
+* remove unnecessary state update in pause handler ([e542a23](https://github.com/eugen-k/react-smart-ticker/commit/e542a23eec43b3f6d284c555131e2b0b1d429108))
+* remove unnecessary state update in pause handler ([43a8f37](https://github.com/eugen-k/react-smart-ticker/commit/43a8f379db73ed4c44277209c92319237ac52e1e))
+
 ## [1.5.3](https://github.com/eugen-k/react-smart-ticker/compare/v1.5.2...v1.5.3) (2025-05-21)
 
 
