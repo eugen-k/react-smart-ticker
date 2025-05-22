@@ -85,7 +85,6 @@ export const useTickerAnimation = ({
     },
     pause: () => {
       setIsPaused(true)
-      setIsAnimating(false)
       animationRef.current.pause()
     },
     reset: (isPaused = true) => {
