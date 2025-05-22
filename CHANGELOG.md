@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.5](https://github.com/eugen-k/react-smart-ticker/compare/v1.5.4...v1.5.5) (2025-05-22)
+
+
+### Bug Fixes
+
+* ensure safe access to wrapperEl in animation calculations ([c3d7ce5](https://github.com/eugen-k/react-smart-ticker/commit/c3d7ce5b3cea82ed1aa893317cfb80c516e7fe83))
+* ensure safe access to wrapperEl in animation calculations ([7d963a9](https://github.com/eugen-k/react-smart-ticker/commit/7d963a938a2b600c916e1701f1c434b2a74003f5))
+
 ## [1.5.4](https://github.com/eugen-k/react-smart-ticker/compare/v1.5.3...v1.5.4) (2025-05-22)
 
 
