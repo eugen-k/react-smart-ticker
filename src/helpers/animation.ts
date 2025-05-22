@@ -118,13 +118,15 @@ export class Animation {
     ) {
       switch (this.axis) {
         case 'x': {
-          const wrapperX = Number(this.wrapperEl?.current?.style.left.replace('px', ''))
-          const tickerWidth = Number(this.tickerEl?.current?.style.minWidth.replace('px', ''))
+          const wrapperX = Number(this.wrapperEl?.current?.style.left.replace('px', '')) || 0
+          const tickerWidth = Number(this.tickerEl?.current?.style.minWidth.replace('px', '')) || 0
 
           if (this.wrapperEl && wrapperX >= tickerWidth) {
             if (!this.isDragging) this.iterationCounter++
             requestAnimationFrame(() => {
-              this.wrapperEl!.current!.style.left = wrapperX - tickerWidth + 'px'
+              if (this.wrapperEl?.current) {
+                this.wrapperEl!.current!.style.left = wrapperX - tickerWidth + 'px'
+              }
             })
             break
           }
@@ -132,7 +134,9 @@ export class Animation {
           if (this.wrapperEl && wrapperX <= -tickerWidth) {
             if (!this.isDragging) this.iterationCounter++
             requestAnimationFrame(() => {
-              this.wrapperEl!.current!.style.left = wrapperX + tickerWidth + 'px'
+              if (this.wrapperEl?.current) {
+                this.wrapperEl!.current!.style.left = wrapperX + tickerWidth + 'px'
+              }
             })
             break
           }
@@ -145,7 +149,9 @@ export class Animation {
           if (this.wrapperEl && wrapperTop >= tickerHeight) {
             if (!this.isDragging) this.iterationCounter++
             requestAnimationFrame(() => {
-              this.wrapperEl!.current!.style.top = wrapperTop - tickerHeight + 'px'
+              if (this.wrapperEl?.current) {
+                this.wrapperEl.current.style.top = wrapperTop - tickerHeight + 'px'
+              }
             })
             break
           }
@@ -153,7 +159,9 @@ export class Animation {
           if (this.wrapperEl && wrapperTop <= -tickerHeight) {
             if (!this.isDragging) this.iterationCounter++
             requestAnimationFrame(() => {
-              this.wrapperEl!.current!.style.top = wrapperTop + tickerHeight + 'px'
+              if (this.wrapperEl?.current) {
+                this.wrapperEl.current.style.top = wrapperTop + tickerHeight + 'px'
+              }
             })
             break
           }
@@ -208,14 +216,16 @@ export class Animation {
       }
     } else if (key === AnimationKey.Restart) {
       const newPos = Number(
-        this.wrapperEl!.current!.style[this.axis === 'x' ? 'left' : 'top'].replace('px', '')
+        this.wrapperEl?.current?.style[this.axis === 'x' ? 'left' : 'top'].replace('px', '') || 0
       )
 
       if (newPos * -this.getSign() >= 0) {
         this.stopAnimation()
 
         requestAnimationFrame(() => {
-          this.wrapperEl!.current!.style[this.axis === 'x' ? 'left' : 'top'] = 0 + 'px'
+          if (this.wrapperEl?.current) {
+            this.wrapperEl.current.style[this.axis === 'x' ? 'left' : 'top'] = 0 + 'px'
+          }
 
           if (this.iterations === 'infinite' || this.iterationCounter < this.iterations) {
             this.timeoutIds.push(
@@ -238,7 +248,7 @@ export class Animation {
       }
     } else if (key === AnimationKey.Back) {
       const newPos = Number(
-        this.wrapperEl!.current!.style[this.axis === 'x' ? 'left' : 'top'].replace('px', '')
+        this.wrapperEl?.current?.style[this.axis === 'x' ? 'left' : 'top'].replace('px', '')
       )
 
       if (newPos * -this.getSign() >= 0) {
@@ -246,7 +256,9 @@ export class Animation {
         this.animationState = null
 
         requestAnimationFrame(() => {
-          this.wrapperEl!.current!.style[this.axis === 'x' ? 'left' : 'top'] = 0 + 'px'
+          if (this.wrapperEl?.current) {
+            this.wrapperEl.current.style[this.axis === 'x' ? 'left' : 'top'] = 0 + 'px'
+          }
         })
 
         if (onEnd) {
