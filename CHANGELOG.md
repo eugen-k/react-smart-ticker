@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.6.0](https://github.com/eugen-k/react-smart-ticker/compare/v1.5.5...v1.6.0) (2025-05-28)
+
+
+### Features
+
+* **animation:** Refactor animation handling in the Animation class to cache transform values and manage scrolling behavior on mobile devices ([03b56d8](https://github.com/eugen-k/react-smart-ticker/commit/03b56d8a215f59109aee8e4bba8318d93e71756e))
+* **tests:** refactor SmartTickerDraggable tests to use getTransformPosition helper and mock WebKitCSSMatrix ([a9fff64](https://github.com/eugen-k/react-smart-ticker/commit/a9fff64b0a2f57a4c58cd05b24b5c6a31b00e147))
+
 ## [1.5.5](https://github.com/eugen-k/react-smart-ticker/compare/v1.5.4...v1.5.5) (2025-05-22)
 
 
