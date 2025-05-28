@@ -179,7 +179,7 @@ export class Animation {
   }
 
   // MARK: getTransformPosition
-  private getTransformPosition(): { x: number; y: number } {
+  getTransformPosition(): { x: number; y: number } {
     if (!this.cachedWrapper) {
       // Only cache if not initialized at all
       this.cacheValues()
@@ -194,24 +194,17 @@ export class Animation {
   }
 
   // MARK: setTransformPosition
-  private setTransformPosition(x: number, y: number) {
+  setTransformPosition(x: number, y: number) {
     if (!this.cachedWrapper || !this.cachedStyle) return
 
     // Update internal position state
     this.currentX = x
     this.currentY = y
 
-    // Use matrix transform for better performance
-    const matrix = `matrix(1, 0, 0, 1, ${x}, ${y})`
-    this.cachedStyle.transform = this.isGPUAccelerated ? `${matrix} translateZ(0)` : matrix
-
-    // Force style recalc only in test environment
-    if (process.env.NODE_ENV === 'test') {
-      void this.cachedWrapper.getBoundingClientRect()
-    }
+    // Use translate3d for better compositing
+    this.cachedStyle.transform = `translate3d(${x}px, ${y}px, 0)`
   }
 
-  // MARK: alignPosition
   alignPosition(key: AnimationKey, onEnd?: () => void): boolean {
     if (!this.isInited || !this.cachedWrapper) return false
 
