@@ -56,6 +56,10 @@ export class Animation {
 
   private readonly isMobile: boolean = false
 
+  // Add internal position tracking
+  private currentX: number = 0
+  private currentY: number = 0
+
   constructor() {
     try {
       // Only keep GPU detection if needed
@@ -183,13 +187,9 @@ export class Animation {
     }
 
     // Use cached wrapper directly
-    const transform = window.getComputedStyle(this.cachedWrapper).transform
-    const matrix = new WebKitCSSMatrix(
-      transform === 'none' ? 'matrix(1, 0, 0, 1, 0, 0)' : transform
-    )
     return {
-      x: matrix.e || 0,
-      y: matrix.f || 0
+      x: this.currentX,
+      y: this.currentY
     }
   }
 
@@ -197,17 +197,15 @@ export class Animation {
   private setTransformPosition(x: number, y: number) {
     if (!this.cachedWrapper || !this.cachedStyle) return
 
-    // Ensure values are numbers and not NaN
-    x = typeof x === 'number' && !isNaN(x) ? x : 0
-    y = typeof y === 'number' && !isNaN(y) ? y : 0
+    // Update internal position state
+    this.currentX = x
+    this.currentY = y
 
-    // Use matrix transform for better performance and compatibility
+    // Use matrix transform for better performance
     const matrix = `matrix(1, 0, 0, 1, ${x}, ${y})`
-
-    // Add GPU acceleration if enabled
     this.cachedStyle.transform = this.isGPUAccelerated ? `${matrix} translateZ(0)` : matrix
 
-    // Force a style recalculation in test environments
+    // Force style recalc only in test environment
     if (process.env.NODE_ENV === 'test') {
       void this.cachedWrapper.getBoundingClientRect()
     }
