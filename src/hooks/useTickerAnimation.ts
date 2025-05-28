@@ -106,20 +106,23 @@ export const useTickerAnimation = ({
 
   useEffect(() => {
     return () => {
+      // Remove event listeners
       removeEventListener('mousemove', dragListener)
       removeEventListener('mouseup', mouseUpHandler as EventListener)
       removeEventListener('touchmove', touchListener)
       removeEventListener('touchend', touchEndHandler as EventListener)
-      setIsPaused(false)
-      setIsAnimating(true)
-      animationRef.current.backToStartPosition(
-        true,
-        () => {
-          setIsPaused(true)
-          setIsAnimating(false)
-        },
-        true
-      )
+
+      // Reset animation
+      if (animationRef.current) {
+        animationRef.current.backToStartPosition(
+          true,
+          () => {
+            setIsPaused(true)
+            setIsAnimating(false)
+          },
+          true
+        )
+      }
     }
   }, [])
 
@@ -194,7 +197,7 @@ export const useTickerAnimation = ({
       }
     } else if (canBeAnimated) {
       if (wrapperRef.current) {
-        wrapperRef.current.style.willChange = axis === 'x' ? 'left' : 'top'
+        wrapperRef.current.style.willChange = 'transform'
       }
     }
   }, [isPaused, canBeAnimated])
@@ -218,7 +221,7 @@ export const useTickerAnimation = ({
         animationRef.current.play(() => {
           setIsPaused(true)
           setIsAnimating(false)
-        })
+        }, true)
       } else {
         setIsPaused(false)
         setIsAnimating(true)
@@ -240,7 +243,7 @@ export const useTickerAnimation = ({
         animationRef.current.play(() => {
           setIsPaused(true)
           setIsAnimating(false)
-        })
+        }, true)
       }
     }
   }, [isHovered])
@@ -251,7 +254,7 @@ export const useTickerAnimation = ({
     let deltaX = 0
     let deltaY = 0
 
-    // min "top" or "left" position depending on the direction
+    // Calculate min/max positions for bounds checking
     const minPos: { [Property in typeof axis]: { [Property in Directions]?: number } } = {
       y: {
         top: -(tickerRect.height - containerRect.height),
@@ -262,45 +265,77 @@ export const useTickerAnimation = ({
         right: 0
       }
     }
-    // max "top" or "left" position depending on the direction
+
     const maxPos: { [Property in typeof axis]: { [Property in Directions]?: number } } = {
-      y: { top: 0, bottom: tickerRect.height - containerRect.height },
+      y: {
+        top: 0,
+        bottom: tickerRect.height - containerRect.height
+      },
       x: {
         left: 0,
         right: tickerRect.width - containerRect.width
       }
     }
 
-    return (e: MouseEvent | TouchEvent) => {
-      deltaX = oldX - Number((e as MouseEvent).clientX ?? (e as TouchEvent).touches[0]?.clientX)
-      deltaY = oldY - Number((e as MouseEvent).clientY ?? (e as TouchEvent).touches[0]?.clientY)
+    const handleMove = (e: Event) => {
+      if (!wrapperRef.current) return
 
-      oldX = (e as MouseEvent).clientX ?? (e as TouchEvent).touches[0]?.clientX
-      oldY = (e as MouseEvent).clientY ?? (e as TouchEvent).touches[0]?.clientY
+      const event = e as MouseEvent | TouchEvent
+
+      // Get current coordinates
+      const newX = (event as MouseEvent).clientX ?? (event as TouchEvent).touches?.[0]?.clientX ?? 0
+      const newY = (event as MouseEvent).clientY ?? (event as TouchEvent).touches?.[0]?.clientY ?? 0
+
+      // Calculate movement deltas
+      deltaX = oldX - newX
+      deltaY = oldY - newY
+
+      // Update reference positions for next move
+      oldX = newX
+      oldY = newY
 
       requestAnimationFrame(() => {
+        if (!wrapperRef.current) return
+
+        // Get current transform matrix
+        const transform = window.getComputedStyle(wrapperRef.current).transform
+        const matrix = new WebKitCSSMatrix(
+          transform === 'none' ? 'matrix(1, 0, 0, 1, 0, 0)' : transform
+        )
+        const currentX = matrix.e || 0
+        const currentY = matrix.f || 0
+
+        // Calculate new position
+        let newX = axis === 'x' ? currentX - deltaX : currentX
+        let newY = axis === 'y' ? currentY - deltaY : currentY
+
         if (infiniteScrollView) {
-          wrapperRef.current!.style[axis === 'x' ? 'left' : 'top'] =
-            Number(wrapperRef.current!.style[axis === 'x' ? 'left' : 'top'].replace('px', '')) -
-            (axis === 'x' ? deltaX : deltaY) +
-            'px' // update position
+          // Let alignPosition handle wrapping for infinite scroll
+          wrapperRef.current.style.transform = `matrix(1, 0, 0, 1, ${newX}, ${newY}) translateZ(0)`
           animationRef.current.alignPosition(AnimationKey.Dragging)
         } else {
-          const curPos = Number(
-            wrapperRef.current!.style[axis === 'x' ? 'left' : 'top'].replace('px', '')
-          )
-          const newPos = curPos - (axis === 'x' ? deltaX : deltaY)
+          // Apply bounds for non-infinite scroll
+          const minBound = minPos[axis][direction]!
+          const maxBound = maxPos[axis][direction]!
 
-          if (newPos < minPos[axis][direction]! || newPos > maxPos[axis][direction]!) {
-            deltaX = deltaX / 50
-            deltaY = deltaY / 50
+          // Apply resistance when dragging beyond bounds
+          if (
+            (axis === 'x' && (newX < minBound || newX > maxBound)) ||
+            (axis === 'y' && (newY < minBound || newY > maxBound))
+          ) {
+            deltaX = deltaX / 70 // Increased resistance for smoother edge behavior
+            deltaY = deltaY / 70
+            newX = axis === 'x' ? currentX - deltaX : currentX
+            newY = axis === 'y' ? currentY - deltaY : currentY
           }
 
-          wrapperRef.current!.style[axis === 'x' ? 'left' : 'top'] =
-            curPos - (axis === 'x' ? deltaX : deltaY) + 'px'
+          // Apply transform with GPU acceleration
+          wrapperRef.current.style.transform = `matrix(1, 0, 0, 1, ${newX}, ${newY}) translateZ(0)`
         }
       })
     }
+
+    return handleMove
   }
 
   const onMouseDownHandler = (e: React.MouseEvent) => {
@@ -313,16 +348,16 @@ export const useTickerAnimation = ({
     animationRef.current.setIsDragging(true)
 
     if (wrapperRef.current) {
-      wrapperRef.current.style.willChange = axis === 'x' ? 'left' : 'top'
+      wrapperRef.current.style.willChange = 'transform'
     }
 
-    addEventListener('mousemove', (dragListener = onMoveHandler(e) as EventListener))
+    dragListener = onMoveHandler(e)
+    addEventListener('mousemove', dragListener)
 
     addEventListener(
       'mouseup',
       (mouseUpHandler = (e: Event) => {
-        const mouseEvent = e as unknown as MouseEvent
-        mouseEvent.preventDefault()
+        e.preventDefault()
 
         if (typeof onMouseUp === 'function') {
           onMouseUp()
@@ -353,32 +388,31 @@ export const useTickerAnimation = ({
             setIsAnimating(false)
           })
         }
+
         removeEventListener('mousemove', dragListener)
-        removeEventListener('mouseup', mouseUpHandler as EventListener)
+        removeEventListener('mouseup', mouseUpHandler)
       })
     )
   }
 
   const onTouchStartHandler = (e: React.TouchEvent) => {
-    animationRef.current.setIsDragging(true)
-
     if (typeof onMouseDown === 'function') {
       onMouseDown()
     }
+
+    animationRef.current.setIsDragging(true)
 
     if (wrapperRef.current) {
       wrapperRef.current.style.willChange = axis === 'x' ? 'left' : 'top'
     }
 
-    addEventListener('touchmove', (touchListener = onMoveHandler(e) as EventListener))
+    touchListener = onMoveHandler(e)
+    addEventListener('touchmove', touchListener)
 
     addEventListener(
       'touchend',
       (touchEndHandler = (e: Event) => {
-        const touchEvent = e as unknown as TouchEvent
-        touchEvent.preventDefault()
-
-        animationRef.current.setIsDragging(false)
+        e.preventDefault()
 
         if (typeof onMouseUp === 'function') {
           onMouseUp()
@@ -387,6 +421,8 @@ export const useTickerAnimation = ({
         if (wrapperRef.current) {
           wrapperRef.current.style.willChange = 'auto'
         }
+
+        animationRef.current.setIsDragging(false)
 
         if (
           canBeAnimated &&
@@ -407,22 +443,27 @@ export const useTickerAnimation = ({
             setIsAnimating(false)
           })
         }
+
         removeEventListener('touchmove', touchListener)
         removeEventListener('touchend', touchEndHandler)
       })
     )
   }
 
-  const onVisibilityChangeHandler = useCallback(() => {
-    animationRef.current.toggleByVisibility()
-  }, [])
+  const onVisibilityChangeHandler = () => {
+    if (document.visibilityState === 'hidden') {
+      animationRef.current.toggleByVisibility()
+    } else if (document.visibilityState === 'visible') {
+      animationRef.current.toggleByVisibility()
+    }
+  }
 
   return {
     onMouseDownHandler,
     onMoveHandler,
+    onVisibilityChangeHandler,
     onTouchStartHandler,
     onContainerHoverHandler,
-    onVisibilityChangeHandler,
     isPaused,
     isAnimating,
     wrapperRef,

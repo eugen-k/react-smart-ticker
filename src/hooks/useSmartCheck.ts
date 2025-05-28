@@ -85,7 +85,9 @@ export const useSmartCheck: UseSmartCheckHook = ({
         maxWidth: mMaxWidth,
         maxHeight: mMaxHeight,
         whiteSpace: mWhiteSpace,
-        overflow: mOverflow
+        overflow: mOverflow,
+        transform: mTransform,
+        willChange: mWillChange
       } = tickerRef.current.style
 
       const {
@@ -94,9 +96,13 @@ export const useSmartCheck: UseSmartCheckHook = ({
         maxWidth: cMaxWidth,
         maxHeight: cMaxHeight,
         overflow: cOverflow,
-        display: cDisplay
+        display: cDisplay,
+        transform: cTransform
       } = containerRef.current.style
 
+      // Set measurement styles
+      tickerRef.current.style.transform = 'none'
+      tickerRef.current.style.willChange = 'transform'
       tickerRef.current.style.display = 'inline-flex'
       tickerRef.current.style.minWidth = 'auto'
       tickerRef.current.style.minHeight = 'auto'
@@ -114,6 +120,7 @@ export const useSmartCheck: UseSmartCheckHook = ({
       containerRef.current.style.overflow = 'hidden'
       tickerRef.current.style.overflow = 'visible'
 
+      // Get measurements
       let { width: containerWidth, height: containerHeight } =
         containerRef.current.getBoundingClientRect()
       let { width: tickerWidth, height: tickerHeight } = tickerRef.current.getBoundingClientRect()
@@ -148,7 +155,11 @@ export const useSmartCheck: UseSmartCheckHook = ({
       containerRef.current.style.display = cDisplay
       tickerRef.current.style.overflow = mOverflow
       tickerRef.current.style.whiteSpace = mWhiteSpace
+      tickerRef.current.style.transform = mTransform
+      tickerRef.current.style.willChange = mWillChange
+      containerRef.current.style.transform = cTransform
 
+      // Continue with calculations
       let _isChildFit: boolean = autoFill ? false : true
 
       switch (axis) {
