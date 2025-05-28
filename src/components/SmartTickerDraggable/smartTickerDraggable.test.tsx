@@ -6,6 +6,16 @@ import { SmartTickerDraggable } from '.'
 import { fireEvent, waitFor } from '@testing-library/dom'
 import { SmartTickerDraggableProps } from '../../types/smartTickerTypes'
 
+// Helper function to get transform position
+function getTransformPosition(element: HTMLElement): { x: number; y: number } {
+  const transform = window.getComputedStyle(element).transform
+  const matrix = new WebKitCSSMatrix(transform)
+  return {
+    x: matrix.e,
+    y: matrix.f
+  }
+}
+
 // A helper component to facilitate testing with refs
 const SmartTickerWithControl = ({
   play,
@@ -44,6 +54,98 @@ const SmartTickerWithControl = ({
 const mockGetBoundingClientRect = jest.fn()
 
 beforeAll(() => {
+  // Mock matchMedia
+  window.matchMedia = jest.fn().mockImplementation((query) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn()
+  }))
+
+  // Mock WebKitCSSMatrix
+  window.WebKitCSSMatrix = class WebKitCSSMatrix {
+    constructor(transform: string) {
+      // Initialize with identity matrix values
+      this.m11 = this.a = 1
+      this.m12 = this.b = 0
+      this.m21 = this.c = 0
+      this.m22 = this.d = 1
+      this.m41 = this.e = 0
+      this.m42 = this.f = 0
+
+      // Parse transform if provided
+      if (transform && transform !== 'none') {
+        // Strip translateZ if present and get the base transform
+        transform = transform.replace(/translateZ\(\d+px\)/, '').trim()
+
+        // Handle matrix(a, b, c, d, e, f) format
+        const matrixMatch = transform.match(/matrix\(([-\d.,\s]+)\)/)
+        if (matrixMatch) {
+          const values = matrixMatch[1].split(',').map((v) => parseFloat(v.trim()))
+          if (values.length >= 6) {
+            ;[this.a, this.b, this.c, this.d, this.e, this.f] = values
+            ;[this.m11, this.m12, this.m21, this.m22, this.m41, this.m42] = values
+          }
+        }
+        // Handle matrix3d format if needed
+        const matrix3dMatch = transform.match(/matrix3d\(([-\d.,\s]+)\)/)
+        if (matrix3dMatch) {
+          const values = matrix3dMatch[1].split(',').map((v) => parseFloat(v.trim()))
+          if (values.length >= 16) {
+            this.m11 = values[0]
+            this.m12 = values[1]
+            this.m21 = values[4]
+            this.m22 = values[5]
+            this.m41 = values[12]
+            this.m42 = values[13]
+            this.a = this.m11
+            this.b = this.m12
+            this.c = this.m21
+            this.d = this.m22
+            this.e = this.m41
+            this.f = this.m42
+          }
+        }
+        // Handle translate3d and translate
+        const translate3dMatch = transform.match(/translate3d\(([-\d.px%,\s]+)\)/)
+        if (translate3dMatch) {
+          const values = translate3dMatch[1].split(',').map((v) => parseFloat(v))
+          this.e = this.m41 = values[0] || 0
+          this.f = this.m42 = values[1] || 0
+        }
+      }
+    }
+
+    // 2D properties
+    a: number
+    b: number
+    c: number
+    d: number
+    e: number
+    f: number
+    // 3D properties
+    m11: number
+    m12: number
+    m21: number
+    m22: number
+    m41: number
+    m42: number
+
+    static fromFloat32Array(): unknown {
+      return new (window.WebKitCSSMatrix as typeof window.WebKitCSSMatrix)('') as WebKitCSSMatrix
+    }
+    static fromFloat64Array(): unknown {
+      return new (window.WebKitCSSMatrix as typeof window.WebKitCSSMatrix)('') as WebKitCSSMatrix
+    }
+    static fromMatrix(): WebKitCSSMatrix {
+      return new (window.WebKitCSSMatrix as typeof window.WebKitCSSMatrix)('') as WebKitCSSMatrix
+    }
+  } as unknown as typeof window.WebKitCSSMatrix
+
   Object.defineProperty(document.documentElement, 'clientWidth', {
     configurable: true,
     value: 1200
@@ -156,7 +258,7 @@ describe('SmartTickerDraggable', () => {
 
     await new Promise((r) => setTimeout(r, 100))
 
-    expect(Number(wrapper.style.left.replace('px', ''))).toBeLessThan(0)
+    expect(getTransformPosition(wrapper).x).toBeLessThan(0)
   })
 
   test('starts the animation and pause on hover', async () => {
@@ -173,11 +275,11 @@ describe('SmartTickerDraggable', () => {
 
     await new Promise((r) => setTimeout(r, 200))
 
-    const curPos = Number(wrapper.style.left.replace('px', ''))
+    const curPos = getTransformPosition(wrapper).x
 
     fireEvent.mouseOver(container)
 
-    expect(Number(wrapper.style.left.replace('px', ''))).toBe(curPos)
+    expect(getTransformPosition(wrapper).x).toBe(curPos)
   })
 
   test('starts the animation to the right', async () => {
@@ -193,7 +295,7 @@ describe('SmartTickerDraggable', () => {
 
     await new Promise((r) => setTimeout(r, 100))
 
-    expect(Number(wrapper.style.left.replace('px', ''))).toBeGreaterThan(0)
+    expect(getTransformPosition(wrapper).x).toBeGreaterThan(0)
   })
 
   test('starts the animation to the right when child fits and infiniteScrollView is on', async () => {
@@ -223,7 +325,7 @@ describe('SmartTickerDraggable', () => {
 
     await new Promise((r) => setTimeout(r, 500))
 
-    expect(Number(wrapper.style.left.replace('px', ''))).toBeGreaterThan(0)
+    expect(getTransformPosition(wrapper).x).toBeGreaterThan(0)
   })
 
   test('starts the animation to the right when child doesnt fit and infiniteScrollView is off', async () => {
@@ -253,7 +355,7 @@ describe('SmartTickerDraggable', () => {
 
     await new Promise((r) => setTimeout(r, 500))
 
-    expect(Number(wrapper.style.left.replace('px', ''))).toBeGreaterThan(0)
+    expect(getTransformPosition(wrapper).x).toBeGreaterThan(0)
   })
 
   test('plays on play action', async () => {
@@ -275,7 +377,7 @@ describe('SmartTickerDraggable', () => {
 
     const wrapper = screen.getByTestId('ticker-wrapper')
 
-    expect(Number(wrapper.style.left.replace('px', ''))).toBeCloseTo(0)
+    expect(getTransformPosition(wrapper).x).toBeCloseTo(0)
 
     await act(async () => {
       play()
@@ -283,7 +385,7 @@ describe('SmartTickerDraggable', () => {
 
     await new Promise((r) => setTimeout(r, 500))
 
-    expect(Number(wrapper.style.left.replace('px', ''))).toBeLessThan(0)
+    expect(getTransformPosition(wrapper).x).toBeLessThan(0)
   })
 
   test('pauses on pause action', async () => {
@@ -307,7 +409,7 @@ describe('SmartTickerDraggable', () => {
 
     await new Promise((r) => setTimeout(r, 100))
 
-    const position = Number(wrapper.style.left.replace('px', ''))
+    const position = getTransformPosition(wrapper).x
 
     expect(position).toBeLessThan(0)
 
@@ -315,7 +417,7 @@ describe('SmartTickerDraggable', () => {
       pause()
     })
 
-    expect(Number(wrapper.style.left.replace('px', ''))).toBeCloseTo(position)
+    expect(getTransformPosition(wrapper).x).toBeCloseTo(position)
   })
 
   test('resets with pause on reset action', async () => {
@@ -340,7 +442,7 @@ describe('SmartTickerDraggable', () => {
 
     await new Promise((r) => setTimeout(r, 100))
 
-    const position = Number(wrapper.style.left.replace('px', ''))
+    const position = getTransformPosition(wrapper).x
 
     expect(position).toBeLessThan(0)
 
@@ -350,7 +452,7 @@ describe('SmartTickerDraggable', () => {
 
     await new Promise((r) => setTimeout(r, 100))
 
-    expect(Number(wrapper.style.left.replace('px', ''))).toBeCloseTo(0)
+    expect(getTransformPosition(wrapper).x).toBeCloseTo(0)
   })
 
   test('resets with play on reset action', async () => {
@@ -375,7 +477,7 @@ describe('SmartTickerDraggable', () => {
 
     await new Promise((r) => setTimeout(r, 100))
 
-    const position = Number(wrapper.style.left.replace('px', ''))
+    const position = getTransformPosition(wrapper).x
 
     expect(position).toBeLessThan(0)
 
@@ -385,7 +487,7 @@ describe('SmartTickerDraggable', () => {
 
     await new Promise((r) => setTimeout(r, 200))
 
-    expect(Number(wrapper.style.left.replace('px', ''))).toBeLessThan(0)
+    expect(getTransformPosition(wrapper).x).toBeLessThan(0)
   })
 
   test('paused while onVisibilityChange(hidden) and playing back on onVisibilityChange(visible)', async () => {
@@ -401,7 +503,7 @@ describe('SmartTickerDraggable', () => {
 
     await new Promise((r) => setTimeout(r, 100))
 
-    const position = Number(wrapper.style.left.replace('px', ''))
+    const position = getTransformPosition(wrapper).x
 
     // moving
     expect(position).toBeLessThan(0)
@@ -410,12 +512,12 @@ describe('SmartTickerDraggable', () => {
       changeVisibility('hidden')
     })
 
-    const pausedPosition = Number(wrapper.style.left.replace('px', ''))
+    const pausedPosition = getTransformPosition(wrapper).x
 
     await new Promise((r) => setTimeout(r, 100))
 
     // paused
-    expect(Number(wrapper.style.left.replace('px', ''))).toBe(pausedPosition)
+    expect(getTransformPosition(wrapper).x).toBe(pausedPosition)
 
     await act(async () => {
       changeVisibility('visible')
@@ -424,7 +526,7 @@ describe('SmartTickerDraggable', () => {
     await new Promise((r) => setTimeout(r, 100))
 
     // moving
-    expect(Number(wrapper.style.left.replace('px', ''))).toBeLessThan(pausedPosition)
+    expect(getTransformPosition(wrapper).x).toBeLessThan(pausedPosition)
   })
 
   test('changes position on touchMove to the right', async () => {
@@ -440,7 +542,7 @@ describe('SmartTickerDraggable', () => {
 
     await new Promise((r) => setTimeout(r, 100))
 
-    const curPos = Number(wrapper.style.left.replace('px', ''))
+    const curPos = getTransformPosition(wrapper).x
 
     fireEvent.touchStart(wrapper, { touches: [{ clientX: 0, clientY: 0 }] })
     fireEvent.touchMove(wrapper, { touches: [{ clientX: 20, clientY: 0 }] })
@@ -448,7 +550,7 @@ describe('SmartTickerDraggable', () => {
     await new Promise((r) => setTimeout(r, 100))
 
     fireEvent.touchEnd(wrapper)
-    expect(Number(wrapper.style.left.replace('px', ''))).toBe(curPos + 20)
+    expect(getTransformPosition(wrapper).x).toBe(curPos + 20)
   })
 
   test('changes position on mouseMove to the right', async () => {
@@ -464,7 +566,7 @@ describe('SmartTickerDraggable', () => {
 
     await new Promise((r) => setTimeout(r, 100))
 
-    const curPos = Number(wrapper.style.left.replace('px', ''))
+    const curPos = getTransformPosition(wrapper).x
 
     fireEvent.mouseDown(wrapper, { clientX: 0, clientY: 0 })
     fireEvent.mouseMove(wrapper, { clientX: 20, clientY: 0 })
@@ -472,7 +574,7 @@ describe('SmartTickerDraggable', () => {
     await new Promise((r) => setTimeout(r, 100))
 
     fireEvent.mouseUp(wrapper)
-    expect(Number(wrapper.style.left.replace('px', ''))).toBe(curPos + 20)
+    expect(getTransformPosition(wrapper).x).toBe(curPos + 20)
   })
 
   test('changes position on mouseMove to the right when infiniteScrollView param is off', async () => {
@@ -495,13 +597,13 @@ describe('SmartTickerDraggable', () => {
 
     await new Promise((r) => setTimeout(r, 200))
 
-    expect(Number(wrapper.style.left.replace('px', ''))).toBeGreaterThan(0)
+    expect(getTransformPosition(wrapper).x).toBeGreaterThan(0)
 
     fireEvent.mouseUp(wrapper)
 
     await new Promise((r) => setTimeout(r, 200))
 
-    expect(Number(wrapper.style.left.replace('px', ''))).toBe(0)
+    expect(getTransformPosition(wrapper).x).toBe(0)
   })
 
   test('changes position on mouseMove to the left', async () => {
@@ -517,7 +619,7 @@ describe('SmartTickerDraggable', () => {
 
     await new Promise((r) => setTimeout(r, 100))
 
-    const curPos = Number(wrapper.style.left.replace('px', ''))
+    const curPos = getTransformPosition(wrapper).x
 
     fireEvent.mouseDown(wrapper, { clientX: 0, clientY: 0 })
     fireEvent.mouseMove(wrapper, { clientX: -20, clientY: 0 })
@@ -525,7 +627,7 @@ describe('SmartTickerDraggable', () => {
     await new Promise((r) => setTimeout(r, 100))
 
     fireEvent.mouseUp(wrapper)
-    expect(Number(wrapper.style.left.replace('px', ''))).toBe(curPos - 20)
+    expect(getTransformPosition(wrapper).x).toBe(curPos - 20)
   })
 
   test('changes position on mouseMove to the top', async () => {
@@ -541,7 +643,7 @@ describe('SmartTickerDraggable', () => {
 
     await new Promise((r) => setTimeout(r, 100))
 
-    const curPos = Number(wrapper.style.top.replace('px', ''))
+    const curPos = getTransformPosition(wrapper).y
 
     fireEvent.mouseDown(wrapper, { clientX: 0, clientY: 0 })
     fireEvent.mouseMove(wrapper, { clientX: 0, clientY: 20 })
@@ -549,7 +651,7 @@ describe('SmartTickerDraggable', () => {
     await new Promise((r) => setTimeout(r, 100))
 
     fireEvent.mouseUp(wrapper)
-    expect(Number(wrapper.style.top.replace('px', ''))).toBe(curPos + 20)
+    expect(getTransformPosition(wrapper).y).toBe(curPos + 20)
   })
 
   test('changes position on mouseMove to the bottom', async () => {
@@ -565,7 +667,7 @@ describe('SmartTickerDraggable', () => {
 
     await new Promise((r) => setTimeout(r, 100))
 
-    const curPos = Number(wrapper.style.top.replace('px', ''))
+    const curPos = getTransformPosition(wrapper).y
 
     fireEvent.mouseDown(wrapper, { clientX: 0, clientY: 0 })
     fireEvent.mouseMove(wrapper, { clientX: 0, clientY: -20 })
@@ -573,30 +675,21 @@ describe('SmartTickerDraggable', () => {
     await new Promise((r) => setTimeout(r, 100))
 
     fireEvent.mouseUp(wrapper)
-    expect(Number(wrapper.style.top.replace('px', ''))).toBe(curPos - 20)
+    expect(getTransformPosition(wrapper).y).toBe(curPos - 20)
   })
 
   test("doesn't reset its position on window resize", async () => {
     mockGetBoundingClientRect
-      // container rect
-      .mockReturnValueOnce({
-        width: 200,
-        height: 200
-      })
-      // ticker rect
-      .mockReturnValueOnce({
-        width: 50,
-        height: 50
-      })
-      // line height
-      .mockReturnValueOnce({
-        width: 50,
-        height: 50
-      })
+      .mockReturnValueOnce({ width: 200, height: 200 })
+      .mockReturnValueOnce({ width: 150, height: 50 })
+      .mockReturnValueOnce({ width: 150, height: 50 })
+      // Add extra mock returns for resize measurements
+      .mockReturnValueOnce({ width: 200, height: 200 })
+      .mockReturnValueOnce({ width: 150, height: 50 })
 
     await act(async () => {
       render(
-        <SmartTickerDraggable smart={false} direction='left'>
+        <SmartTickerDraggable smart={false} direction='left' speed={100}>
           Test
         </SmartTickerDraggable>
       )
@@ -604,17 +697,20 @@ describe('SmartTickerDraggable', () => {
 
     const wrapper = screen.getByTestId('ticker-wrapper')
 
+    // Ensure animation has started
     await new Promise((r) => setTimeout(r, 500))
+    const initialPos = Math.abs(getTransformPosition(wrapper).x)
 
-    await waitFor(async () => {
+    // Trigger resize
+    await act(async () => {
       window.dispatchEvent(new Event('resize'))
     })
 
-    const curPos = Math.abs(Number(wrapper.style.left.replace('px', '')))
+    // Wait for measurements and animation frame
+    await new Promise((r) => setTimeout(r, 100))
 
-    await waitFor(async () => new Promise((r) => setTimeout(r, 250)))
-
-    expect(Math.abs(Number(wrapper.style.left.replace('px', '')))).toBeGreaterThan(curPos)
+    const currentPos = Math.abs(getTransformPosition(wrapper).x)
+    expect(currentPos).toBeGreaterThan(initialPos)
   })
 
   test('stops animation after 2 iterations', async () => {
@@ -653,12 +749,12 @@ describe('SmartTickerDraggable', () => {
     // Wait for the first iteration
     await new Promise((r) => setTimeout(r, 100))
 
-    const positionAfterFirstIteration = Number(wrapper.style.left.replace('px', ''))
+    const positionAfterFirstIteration = getTransformPosition(wrapper).x
 
     // Wait for the second iteration
     await new Promise((r) => setTimeout(r, 700))
 
-    const positionAfterSecondIteration = Number(wrapper.style.left.replace('px', ''))
+    const positionAfterSecondIteration = getTransformPosition(wrapper).x
 
     expect(positionAfterFirstIteration).toBeLessThan(0) // Ensure it moved
     expect(positionAfterSecondIteration).toBe(0) // Ensure it stops after 2 iterations
@@ -696,7 +792,7 @@ describe('SmartTickerDraggable', () => {
 
     await new Promise((r) => setTimeout(r, 500))
 
-    expect(Number(wrapper.style.left.replace('px', ''))).toBe(0) // Ensure no movement
+    expect(getTransformPosition(wrapper).x).toBe(0) // Ensure no movement
   })
 
   test('disables dragging when disableDragging is true', async () => {
@@ -714,6 +810,6 @@ describe('SmartTickerDraggable', () => {
     fireEvent.mouseMove(wrapper, { clientX: 20, clientY: 0 })
     fireEvent.mouseUp(wrapper)
 
-    expect(Number(wrapper.style.left.replace('px', ''))).toBe(0) // Ensure no dragging occurred
+    expect(getTransformPosition(wrapper).x).toBe(0) // Ensure no dragging occurred
   })
 })
