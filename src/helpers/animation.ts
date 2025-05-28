@@ -42,14 +42,70 @@ export class Animation {
   private delayBack: number
   private iterations: Iterations
   private isInited: boolean = false
+  private onAnimationEnd: (() => void) | null = null
   private onIterationsEnd: (() => void) | null
   private animationStartPos: number
   private reqAnimFrameKey: number | null = null
   private animationState: AnimationKey | null = null
   private timeoutIds: number[] = [] // Track all setTimeout IDs
+  private lastScrollTop: number = 0 // Track the last scroll position for mobile devices
+  private lastScrollLeft: number = 0
+  private scrollDebounceTimeout: number | null = null
+  private isScrolling: boolean = false
 
+  private cachedWrapper: HTMLDivElement | null = null
+  private cachedStyle: CSSStyleDeclaration | null = null
+  private isGPUAccelerated: boolean = true
+
+  private readonly isMobile: boolean = false
+
+  constructor() {
+    try {
+      const mediaQuery = window.matchMedia('(pointer: coarse)')
+      this.isMobile = mediaQuery?.matches ?? false
+    } catch (e) {
+      // In test environment or when matchMedia is not available
+      this.isMobile = false
+    }
+  }
+
+  // MARK: draw
   private draw(fraction: number) {
-    if (this.wrapperEl?.current === null) return
+    if (!this.cachedWrapper || !this.cachedStyle) return
+
+    // Ensure we have initial transform set
+    if (!this.cachedStyle?.transform || this.cachedStyle.transform === 'none') {
+      this.cachedStyle!.transform = 'matrix(1, 0, 0, 1, 0, 0)'
+    }
+
+    // Use cached isMobile value instead of calling method
+    if (this.isMobile) {
+      const currentScrollTop = document.documentElement.scrollTop
+      const currentScrollLeft = document.documentElement.scrollLeft
+
+      if (this.axis === 'x' && currentScrollLeft !== this.lastScrollLeft) {
+        this.lastScrollLeft = currentScrollLeft
+        this.isScrolling = true
+      } else if (this.axis === 'y' && currentScrollTop !== this.lastScrollTop) {
+        this.lastScrollTop = currentScrollTop
+        this.isScrolling = true
+      }
+
+      if (this.isScrolling) {
+        // Clear existing timeout
+        if (this.scrollDebounceTimeout) {
+          clearTimeout(this.scrollDebounceTimeout)
+        }
+
+        // Set new debounce timeout
+        this.scrollDebounceTimeout = window.setTimeout(() => {
+          this.isScrolling = false
+          this.prevTime = performance.now()
+        }, 150) as unknown as number
+
+        return // Skip animation frame during active scrolling
+      }
+    }
 
     const step =
       ([AnimationKey.Back, AnimationKey.Restart].includes(this.animationState!)
@@ -58,27 +114,28 @@ export class Animation {
       fraction *
       this.getSign()
 
-    const newPos =
-      Number(
-        this.wrapperEl?.current?.style[this.axis === 'x' ? 'left' : 'top']?.replace('px', '') || 0
-      ) + step
+    const { x, y } = this.getTransformPosition()
+    const newX = this.axis === 'x' ? x + step : x
+    const newY = this.axis === 'y' ? y + step : y
 
-    this.wrapperEl!.current!.style[this.axis === 'x' ? 'left' : 'top'] = newPos + 'px'
+    this.setTransformPosition(newX, newY)
   }
 
   // MARK: animate
   private animate(key: AnimationKey, onEnd?: () => void) {
     this.stopAnimation()
 
+    if (this.cachedStyle) {
+      this.cachedStyle.willChange = 'transform'
+    }
+
     if (key !== this.animationState) {
       this.animationState = key
     }
 
     this.prevTime = 0
-
-    this.animationStartPos = Number(
-      this.wrapperEl?.current?.style?.[this.axis === 'x' ? 'left' : 'top']?.replace('px', '') || 0
-    )
+    const { x, y } = this.getTransformPosition()
+    this.animationStartPos = this.axis === 'x' ? x : y
 
     const _animate = (time: number) => {
       if (!this.prevTime) this.prevTime = time
@@ -99,178 +156,27 @@ export class Animation {
     if (this.reqAnimFrameKey) {
       cancelAnimationFrame(this.reqAnimFrameKey)
       this.reqAnimFrameKey = null
+
+      // Remove will-change hint
+      if (this.wrapperEl?.current) {
+        this.wrapperEl.current.style.willChange = 'auto'
+      }
     }
   }
 
+  // MARK: clearTimeouts
   private clearTimeouts() {
     // Clear all timeouts
     this.timeoutIds.forEach((id) => clearTimeout(id))
     this.timeoutIds = []
-  }
 
-  // MARK: alignPosition
-  alignPosition(key: AnimationKey, onEnd?: () => void): boolean {
-    if (!this.isInited) return false
-
-    if (
-      this.infiniteScrollView &&
-      (key === AnimationKey.Forward || key === AnimationKey.Dragging)
-    ) {
-      switch (this.axis) {
-        case 'x': {
-          const wrapperX = Number(this.wrapperEl?.current?.style.left.replace('px', '')) || 0
-          const tickerWidth = Number(this.tickerEl?.current?.style.minWidth.replace('px', '')) || 0
-
-          if (this.wrapperEl && wrapperX >= tickerWidth) {
-            if (!this.isDragging) this.iterationCounter++
-            requestAnimationFrame(() => {
-              if (this.wrapperEl?.current) {
-                this.wrapperEl!.current!.style.left = wrapperX - tickerWidth + 'px'
-              }
-            })
-            break
-          }
-
-          if (this.wrapperEl && wrapperX <= -tickerWidth) {
-            if (!this.isDragging) this.iterationCounter++
-            requestAnimationFrame(() => {
-              if (this.wrapperEl?.current) {
-                this.wrapperEl!.current!.style.left = wrapperX + tickerWidth + 'px'
-              }
-            })
-            break
-          }
-          break
-        }
-        case 'y': {
-          const wrapperTop = Number(this.wrapperEl?.current?.style.top.replace('px', ''))
-          const tickerHeight = Number(this.tickerEl?.current?.style.minHeight.replace('px', ''))
-
-          if (this.wrapperEl && wrapperTop >= tickerHeight) {
-            if (!this.isDragging) this.iterationCounter++
-            requestAnimationFrame(() => {
-              if (this.wrapperEl?.current) {
-                this.wrapperEl.current.style.top = wrapperTop - tickerHeight + 'px'
-              }
-            })
-            break
-          }
-
-          if (this.wrapperEl && wrapperTop <= -tickerHeight) {
-            if (!this.isDragging) this.iterationCounter++
-            requestAnimationFrame(() => {
-              if (this.wrapperEl?.current) {
-                this.wrapperEl.current.style.top = wrapperTop + tickerHeight + 'px'
-              }
-            })
-            break
-          }
-          break
-        }
-      }
-
-      if (this.iterations !== 'infinite' && this.iterationCounter >= this.iterations) {
-        this.stopAnimation()
-
-        if (onEnd) {
-          onEnd()
-        }
-
-        if (typeof this.onIterationsEnd === 'function') {
-          this.onIterationsEnd()
-        }
-
-        return false
-      }
-    } else if (key === AnimationKey.Forward) {
-      // max "top" or "left" position depending on the direction
-      const maxPos: { [Property in typeof this.axis]: { [Property in Directions]?: number } } = {
-        y: {
-          top: this.tickerRect.height - this.containerRect.height,
-          bottom: this.tickerRect.height - this.containerRect.height
-        },
-        x: {
-          left: this.tickerRect.width - this.containerRect.width,
-          right: this.tickerRect.width - this.containerRect.width
-        }
-      }
-
-      const newPos = Math.abs(
-        Number(
-          this.wrapperEl?.current?.style?.[this.axis === 'x' ? 'left' : 'top']?.replace('px', '') ||
-            0
-        )
-      )
-
-      if (newPos > maxPos[this.axis][this.direction]!) {
-        this.iterationCounter++
-        this.stopAnimation()
-
-        this.timeoutIds.push(
-          setTimeout(() => {
-            this.restartLoop()
-          }, this.delayBack) as unknown as number
-        )
-
-        return false
-      }
-    } else if (key === AnimationKey.Restart) {
-      const newPos = Number(
-        this.wrapperEl?.current?.style[this.axis === 'x' ? 'left' : 'top'].replace('px', '') || 0
-      )
-
-      if (newPos * -this.getSign() >= 0) {
-        this.stopAnimation()
-
-        requestAnimationFrame(() => {
-          if (this.wrapperEl?.current) {
-            this.wrapperEl.current.style[this.axis === 'x' ? 'left' : 'top'] = 0 + 'px'
-          }
-
-          if (this.iterations === 'infinite' || this.iterationCounter < this.iterations) {
-            this.timeoutIds.push(
-              setTimeout(() => {
-                this.animate(AnimationKey.Forward)
-              }, this.delay) as unknown as number
-            )
-          } else {
-            if (typeof this.onIterationsEnd === 'function') {
-              if (onEnd) {
-                onEnd()
-              }
-
-              this.onIterationsEnd()
-            }
-          }
-        })
-
-        return false
-      }
-    } else if (key === AnimationKey.Back) {
-      const newPos = Number(
-        this.wrapperEl?.current?.style[this.axis === 'x' ? 'left' : 'top'].replace('px', '')
-      )
-
-      if (newPos * -this.getSign() >= 0) {
-        this.stopAnimation()
-        this.animationState = null
-
-        requestAnimationFrame(() => {
-          if (this.wrapperEl?.current) {
-            this.wrapperEl.current.style[this.axis === 'x' ? 'left' : 'top'] = 0 + 'px'
-          }
-        })
-
-        if (onEnd) {
-          onEnd()
-        }
-
-        return false
-      }
+    if (this.scrollDebounceTimeout) {
+      clearTimeout(this.scrollDebounceTimeout)
+      this.scrollDebounceTimeout = null
     }
-    return true
   }
 
+  // MARK: restartLoop
   private restartLoop = () => {
     const restart = () => {
       if (this.wrapperEl.current) {
@@ -293,6 +199,208 @@ export class Animation {
     }
   }
 
+  // MARK: cacheValues
+  private cacheValues() {
+    if (this.wrapperEl?.current) {
+      this.cachedWrapper = this.wrapperEl.current
+      this.cachedStyle = this.cachedWrapper.style
+
+      // Initialize transform if not set
+      const currentTransform = window.getComputedStyle(this.cachedWrapper).transform
+      if (currentTransform === 'none') {
+        this.cachedStyle.transform = 'matrix(1, 0, 0, 1, 0, 0)'
+      }
+
+      if (this.isGPUAccelerated && !this.cachedStyle.transform.includes('translateZ')) {
+        this.cachedStyle.transform += ' translateZ(0)'
+      }
+    }
+  }
+
+  // MARK: getTransformPosition
+  private getTransformPosition(): { x: number; y: number } {
+    if (!this.cachedWrapper) {
+      // Only cache if not initialized at all
+      this.cacheValues()
+      if (!this.cachedWrapper) return { x: 0, y: 0 }
+    }
+
+    // Use cached wrapper directly
+    const transform = window.getComputedStyle(this.cachedWrapper).transform
+    const matrix = new WebKitCSSMatrix(
+      transform === 'none' ? 'matrix(1, 0, 0, 1, 0, 0)' : transform
+    )
+    return {
+      x: matrix.e || 0,
+      y: matrix.f || 0
+    }
+  }
+
+  // MARK: setTransformPosition
+  private setTransformPosition(x: number, y: number) {
+    if (!this.cachedWrapper || !this.cachedStyle) return
+
+    // Ensure values are numbers and not NaN
+    x = typeof x === 'number' && !isNaN(x) ? x : 0
+    y = typeof y === 'number' && !isNaN(y) ? y : 0
+
+    // Use matrix transform for better performance and compatibility
+    const matrix = `matrix(1, 0, 0, 1, ${x}, ${y})`
+
+    // Add GPU acceleration if enabled
+    this.cachedStyle.transform = this.isGPUAccelerated ? `${matrix} translateZ(0)` : matrix
+
+    // Force a style recalculation in test environments
+    if (process.env.NODE_ENV === 'test') {
+      void this.cachedWrapper.getBoundingClientRect()
+    }
+  }
+
+  // MARK: alignPosition
+  alignPosition(key: AnimationKey, onEnd?: () => void): boolean {
+    if (!this.isInited || !this.cachedWrapper) return false
+
+    const { x: wrapperX, y: wrapperY } = this.getTransformPosition()
+
+    if (
+      this.infiniteScrollView &&
+      (key === AnimationKey.Forward || key === AnimationKey.Dragging)
+    ) {
+      switch (this.axis) {
+        case 'x': {
+          const tickerWidth = Number(this.tickerEl?.current?.style.minWidth.replace('px', '')) || 0
+
+          if (wrapperX >= tickerWidth) {
+            if (!this.isDragging) this.iterationCounter++
+            requestAnimationFrame(() => {
+              this.setTransformPosition(wrapperX - tickerWidth, 0)
+            })
+            break
+          }
+
+          if (wrapperX <= -tickerWidth) {
+            if (!this.isDragging) this.iterationCounter++
+            requestAnimationFrame(() => {
+              this.setTransformPosition(wrapperX + tickerWidth, 0)
+            })
+            break
+          }
+          break
+        }
+        case 'y': {
+          const tickerHeight =
+            Number(this.tickerEl?.current?.style.minHeight.replace('px', '')) || 0
+
+          if (wrapperY >= tickerHeight) {
+            if (!this.isDragging) this.iterationCounter++
+            requestAnimationFrame(() => {
+              this.setTransformPosition(0, wrapperY - tickerHeight)
+            })
+            break
+          }
+
+          if (wrapperY <= -tickerHeight) {
+            if (!this.isDragging) this.iterationCounter++
+            requestAnimationFrame(() => {
+              this.setTransformPosition(0, wrapperY + tickerHeight)
+            })
+            break
+          }
+          break
+        }
+      }
+
+      if (this.iterations !== 'infinite' && this.iterationCounter >= this.iterations) {
+        this.stopAnimation()
+
+        if (typeof onEnd === 'function') {
+          onEnd()
+        }
+
+        if (typeof this.onIterationsEnd === 'function') {
+          this.onIterationsEnd()
+        }
+
+        return false
+      }
+      //MARK: ----forward
+    } else if (key === AnimationKey.Forward) {
+      // max "top" or "left" position depending on the direction
+      const maxPos: { [Property in typeof this.axis]: { [Property in Directions]?: number } } = {
+        y: {
+          top: this.tickerRect.height - this.containerRect.height,
+          bottom: this.tickerRect.height - this.containerRect.height
+        },
+        x: {
+          left: this.tickerRect.width - this.containerRect.width,
+          right: this.tickerRect.width - this.containerRect.width
+        }
+      }
+
+      const newPos = Math.abs(this.axis === 'x' ? wrapperX : wrapperY)
+
+      if (newPos > maxPos[this.axis][this.direction]!) {
+        this.iterationCounter++
+        this.stopAnimation()
+
+        this.timeoutIds.push(
+          setTimeout(() => {
+            this.restartLoop()
+          }, this.delayBack) as unknown as number
+        )
+
+        return false
+      }
+      //MARK: ----restart
+    } else if (key === AnimationKey.Restart) {
+      const newPos = this.axis === 'x' ? wrapperX : wrapperY
+
+      if (newPos * -this.getSign() >= 0) {
+        this.stopAnimation()
+
+        this.setTransformPosition(0, 0)
+
+        if (this.iterations === 'infinite' || this.iterationCounter < this.iterations) {
+          this.timeoutIds.push(
+            setTimeout(() => {
+              this.animate(AnimationKey.Forward)
+            }, this.delay) as unknown as number
+          )
+        } else {
+          this.animationState = null
+
+          if (typeof onEnd === 'function') {
+            onEnd()
+          }
+
+          if (typeof this.onIterationsEnd === 'function') {
+            this.onIterationsEnd()
+          }
+        }
+
+        return false
+      }
+      //MARK: ----back
+    } else if (key === AnimationKey.Back) {
+      const newPos = this.axis === 'x' ? wrapperX : wrapperY
+
+      if (newPos * -this.getSign() >= 0) {
+        this.stopAnimation()
+        this.animationState = null
+
+        this.setTransformPosition(0, 0)
+
+        if (typeof onEnd === 'function') {
+          onEnd()
+        }
+
+        return false
+      }
+    }
+    return true
+  }
+
+  // MARK: pause
   pause() {
     if (!this.isInited) return
 
@@ -314,14 +422,18 @@ export class Animation {
   }
 
   // MARK: play
-  play(onEnd?: () => void) {
-    if (!this.isInited || !this.wrapperEl?.current?.style) return
+  play(onEnd?: () => void, continueAfter: boolean = false) {
+    if (!this.isInited) return
+
+    if (onEnd && typeof onEnd === 'function') {
+      this.onAnimationEnd = onEnd
+    }
 
     this.isPausedByVisibility = false
     this.clearTimeouts()
 
     // If the animation is back already, we need to restart it
-    if (this.animationState === AnimationKey.Back) {
+    if (continueAfter && this.animationState === AnimationKey.Back) {
       this.animationState = AnimationKey.Restart
     }
 
@@ -330,8 +442,8 @@ export class Animation {
         setTimeout(
           () => {
             this.animate(this.animationState || AnimationKey.Forward, () => {
-              if (typeof onEnd === 'function') {
-                onEnd()
+              if (typeof this.onAnimationEnd === 'function') {
+                this.onAnimationEnd()
               }
             })
           },
@@ -341,19 +453,21 @@ export class Animation {
     }
   }
 
+  // MARK: toggleByVisibility
   toggleByVisibility() {
-    if (!this.isInited) return
+    if (!this.isInited) return false
 
     if (document?.visibilityState === 'hidden') {
       // Pausing the animation due to visibility change
       if (this.animationState) {
         this.isPausedByVisibility = true
+        this.stopAnimation()
       }
-      this.stopAnimation()
     } else if (this.isPausedByVisibility && document?.visibilityState === 'visible') {
       // Resuming animation previously paused by visibility change
       this.prevTime = performance.now() // Reset the timer to avoid animation jumps
       this.play()
+      this.isPausedByVisibility = false
     }
   }
   // MARK: init
@@ -392,15 +506,15 @@ export class Animation {
     }
 
     if (startPosition) {
-      this.wrapperEl!.current!.style[this.axis === 'x' ? 'left' : 'top'] = startPosition + 'px'
+      const x = this.axis === 'x' ? startPosition : 0
+      const y = this.axis === 'y' ? startPosition : 0
+      this.setTransformPosition(x, y)
+    } else {
+      this.setTransformPosition(0, 0)
     }
 
-    // Set initial position of the perpendicular axis to 0
-    if (this.axis === 'x') {
-      this.wrapperEl!.current!.style.top = 0 + 'px'
-    } else {
-      this.wrapperEl!.current!.style.left = 0 + 'px'
-    }
+    // Cache values after initial setup
+    this.cacheValues()
 
     this.isInited = true
   }
@@ -408,6 +522,8 @@ export class Animation {
   // MARK: backToStartPosition
   backToStartPosition(willPause: boolean = true, onEnd?: () => void, immediately: boolean = false) {
     if (!this.isInited || !this.wrapperEl?.current?.style) return
+
+    this.onAnimationEnd = onEnd || null
 
     this.clearTimeouts()
 
@@ -424,8 +540,8 @@ export class Animation {
           }, this.delay) as unknown as number
         ) // Cast to number
       } else {
-        if (typeof onEnd === 'function') {
-          onEnd()
+        if (typeof this.onAnimationEnd === 'function') {
+          this.onAnimationEnd()
         }
       }
     })

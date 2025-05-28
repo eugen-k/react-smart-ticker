@@ -227,7 +227,9 @@ export const SmartTickerDraggable: React.FC<SmartTickerDraggableProps> = ({
     [direction]: wrapperRef?.current?.style[direction as keyof CSSStyleDeclaration],
     justifyItems: rtl ? 'flex-end' : 'flex-start',
     flexDirection: axis === 'x' ? 'row' : 'column',
-    transform: `translate${axis}(-${tickerRect[axis === 'x' ? 'width' : 'height']}px)`,
+    transform: `translate3d(${axis === 'x' ? wrapperRef?.current?.style[axis] : 0}px, ${axis === 'y' ? wrapperRef?.current?.style[axis] : 0}px, 0)`,
+    willChange: 'transform',
+    backfaceVisibility: 'hidden',
     ...(isRowEllipses && {
       transform: `translate${axis}(-${containerRect[axis === 'x' ? 'width' : 'height']}px)`
     }),
