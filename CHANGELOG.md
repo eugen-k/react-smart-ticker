@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.6.2](https://github.com/eugen-k/react-smart-ticker/compare/v1.6.1...v1.6.2) (2025-05-28)
+
+
+### Bug Fixes
+
+* **animation:** add internal position tracking ([3b5a5f2](https://github.com/eugen-k/react-smart-ticker/commit/3b5a5f22bd454e3b93a0be52b2b68e0e7c9f2a9b))
+* **animation:** add internal position tracking ([05649c0](https://github.com/eugen-k/react-smart-ticker/commit/05649c08e532d60186f1da671f02d22fae1fb1c0))
+
 ## [1.6.1](https://github.com/eugen-k/react-smart-ticker/compare/v1.6.0...v1.6.1) (2025-05-28)
 
 
