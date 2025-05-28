@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.1](https://github.com/eugen-k/react-smart-ticker/compare/v1.6.0...v1.6.1) (2025-05-28)
+
+
+### Bug Fixes
+
+* **animation:** clean up Animation class and add destroy method for proper resource management ([8c56f58](https://github.com/eugen-k/react-smart-ticker/commit/8c56f5872a67a731edaac501f24f449a8c626647))
+
 ## [1.6.0](https://github.com/eugen-k/react-smart-ticker/compare/v1.5.5...v1.6.0) (2025-05-28)
 
 
