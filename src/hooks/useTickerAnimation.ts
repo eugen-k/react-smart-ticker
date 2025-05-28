@@ -298,21 +298,15 @@ export const useTickerAnimation = ({
       requestAnimationFrame(() => {
         if (!wrapperRef.current) return
 
-        // Get current transform matrix
-        const transform = window.getComputedStyle(wrapperRef.current).transform
-        const matrix = new WebKitCSSMatrix(
-          transform === 'none' ? 'matrix(1, 0, 0, 1, 0, 0)' : transform
-        )
-        const currentX = matrix.e || 0
-        const currentY = matrix.f || 0
+        // Get current position from Animation instance
+        const { x: currentX, y: currentY } = animationRef.current.getTransformPosition()
 
         // Calculate new position
         let newX = axis === 'x' ? currentX - deltaX : currentX
         let newY = axis === 'y' ? currentY - deltaY : currentY
 
         if (infiniteScrollView) {
-          // Let alignPosition handle wrapping for infinite scroll
-          wrapperRef.current.style.transform = `matrix(1, 0, 0, 1, ${newX}, ${newY}) translateZ(0)`
+          animationRef.current.setTransformPosition(newX, newY)
           animationRef.current.alignPosition(AnimationKey.Dragging)
         } else {
           // Apply bounds for non-infinite scroll
@@ -330,8 +324,7 @@ export const useTickerAnimation = ({
             newY = axis === 'y' ? currentY - deltaY : currentY
           }
 
-          // Apply transform with GPU acceleration
-          wrapperRef.current.style.transform = `matrix(1, 0, 0, 1, ${newX}, ${newY}) translateZ(0)`
+          animationRef.current.setTransformPosition(newX, newY)
         }
       })
     }
