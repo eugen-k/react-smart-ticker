@@ -119,6 +119,7 @@ export const useTickerAnimation = ({
           () => {
             setIsPaused(true)
             setIsAnimating(false)
+            animationRef.current.destroy()
           },
           true
         )

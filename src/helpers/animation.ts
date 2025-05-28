@@ -45,13 +45,10 @@ export class Animation {
   private onAnimationEnd: (() => void) | null = null
   private onIterationsEnd: (() => void) | null
   private animationStartPos: number
+
   private reqAnimFrameKey: number | null = null
   private animationState: AnimationKey | null = null
-  private timeoutIds: number[] = [] // Track all setTimeout IDs
-  private lastScrollTop: number = 0 // Track the last scroll position for mobile devices
-  private lastScrollLeft: number = 0
-  private scrollDebounceTimeout: number | null = null
-  private isScrolling: boolean = false
+  private timeoutIds: number[] = []
 
   private cachedWrapper: HTMLDivElement | null = null
   private cachedStyle: CSSStyleDeclaration | null = null
@@ -61,51 +58,16 @@ export class Animation {
 
   constructor() {
     try {
-      const mediaQuery = window.matchMedia('(pointer: coarse)')
-      this.isMobile = mediaQuery?.matches ?? false
+      // Only keep GPU detection if needed
+      this.isGPUAccelerated = 'transform' in document.body.style
     } catch (e) {
-      // In test environment or when matchMedia is not available
-      this.isMobile = false
+      this.isGPUAccelerated = false
     }
   }
 
   // MARK: draw
   private draw(fraction: number) {
     if (!this.cachedWrapper || !this.cachedStyle) return
-
-    // Ensure we have initial transform set
-    if (!this.cachedStyle?.transform || this.cachedStyle.transform === 'none') {
-      this.cachedStyle!.transform = 'matrix(1, 0, 0, 1, 0, 0)'
-    }
-
-    // Use cached isMobile value instead of calling method
-    if (this.isMobile) {
-      const currentScrollTop = document.documentElement.scrollTop
-      const currentScrollLeft = document.documentElement.scrollLeft
-
-      if (this.axis === 'x' && currentScrollLeft !== this.lastScrollLeft) {
-        this.lastScrollLeft = currentScrollLeft
-        this.isScrolling = true
-      } else if (this.axis === 'y' && currentScrollTop !== this.lastScrollTop) {
-        this.lastScrollTop = currentScrollTop
-        this.isScrolling = true
-      }
-
-      if (this.isScrolling) {
-        // Clear existing timeout
-        if (this.scrollDebounceTimeout) {
-          clearTimeout(this.scrollDebounceTimeout)
-        }
-
-        // Set new debounce timeout
-        this.scrollDebounceTimeout = window.setTimeout(() => {
-          this.isScrolling = false
-          this.prevTime = performance.now()
-        }, 150) as unknown as number
-
-        return // Skip animation frame during active scrolling
-      }
-    }
 
     const step =
       ([AnimationKey.Back, AnimationKey.Restart].includes(this.animationState!)
@@ -169,11 +131,6 @@ export class Animation {
     // Clear all timeouts
     this.timeoutIds.forEach((id) => clearTimeout(id))
     this.timeoutIds = []
-
-    if (this.scrollDebounceTimeout) {
-      clearTimeout(this.scrollDebounceTimeout)
-      this.scrollDebounceTimeout = null
-    }
   }
 
   // MARK: restartLoop
@@ -553,5 +510,10 @@ export class Animation {
 
   setCounter(counter: number): void {
     this.iterationCounter = counter
+  }
+
+  destroy() {
+    this.clearTimeouts()
+    this.stopAnimation()
   }
 }
