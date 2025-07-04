@@ -12,7 +12,6 @@ type InitParams = {
   wrapperEl: React.RefObject<HTMLDivElement>
   tickerRect: ElRect
   containerRect: ElRect
-  startPosition: number
   speed: number
   speedBack: number
   delay: number
@@ -91,7 +90,7 @@ export class Animation {
   private animate(key: AnimationKey, onEnd?: () => void) {
     this.stopAnimation()
 
-    if (this.cachedStyle) {
+    if (this.cachedStyle && this.cachedStyle.willChange !== 'transform') {
       this.cachedStyle.willChange = 'transform'
     }
 
@@ -106,7 +105,7 @@ export class Animation {
     const _animate = (time: number) => {
       if (!this.prevTime) this.prevTime = time
 
-      const fraction = Math.min((time - this.prevTime) / 1000, 0.1)
+      const fraction = Math.min((time - this.prevTime) / 1000, 0.05)
       this.prevTime = time
       this.draw(fraction)
 
@@ -123,8 +122,8 @@ export class Animation {
       cancelAnimationFrame(this.reqAnimFrameKey)
       this.reqAnimFrameKey = null
 
-      // Remove will-change hint
-      if (this.wrapperEl?.current) {
+      // Only reset will-change if it was set already
+      if (this.wrapperEl?.current && this.wrapperEl.current.style.willChange === 'transform') {
         this.wrapperEl.current.style.willChange = 'auto'
       }
     }
@@ -169,11 +168,7 @@ export class Animation {
       // Initialize transform if not set
       const currentTransform = window.getComputedStyle(this.cachedWrapper).transform
       if (currentTransform === 'none') {
-        this.cachedStyle.transform = 'matrix(1, 0, 0, 1, 0, 0)'
-      }
-
-      if (this.isGPUAccelerated && !this.cachedStyle.transform.includes('translateZ')) {
-        this.cachedStyle.transform += ' translateZ(0)'
+        this.cachedStyle.transform = 'translate3d(0, 0, 0)'
       }
     }
   }
@@ -194,17 +189,29 @@ export class Animation {
   }
 
   // MARK: setTransformPosition
-  setTransformPosition(x: number, y: number) {
+  setTransformPosition(x?: number, y?: number) {
     if (!this.cachedWrapper || !this.cachedStyle) return
 
-    // Update internal position state
-    this.currentX = x
-    this.currentY = y
-
-    // Use translate3d for better compositing
-    this.cachedStyle.transform = `translate3d(${x}px, ${y}px, 0)`
+    // Only update if values actually change
+    let shouldUpdate = false
+    if (typeof x === 'number' && x !== this.currentX) {
+      this.currentX = x
+      shouldUpdate = true
+    }
+    if (typeof y === 'number' && y !== this.currentY) {
+      this.currentY = y
+      shouldUpdate = true
+    }
+    if (shouldUpdate) {
+      requestAnimationFrame(() => {
+        if (this.cachedStyle) {
+          this.cachedStyle.transform = `translate3d(${this.currentX}px, ${this.currentY}px, 0)`
+        }
+      })
+    }
   }
 
+  // MARK: alignPosition
   alignPosition(key: AnimationKey, onEnd?: () => void): boolean {
     if (!this.isInited || !this.cachedWrapper) return false
 
@@ -426,7 +433,6 @@ export class Animation {
     delay,
     delayBack,
     containerRect,
-    startPosition,
     speed,
     speedBack,
     infiniteScrollView,
@@ -436,7 +442,6 @@ export class Animation {
   }: InitParams) {
     this.tickerEl = tickerEl
     this.wrapperEl = wrapperEl
-    this.axis = direction === 'left' || direction === 'right' ? 'x' : 'y'
     this.speed = speed
     this.speedBack = speedBack * -1
     this.iterations = iterations
@@ -449,19 +454,20 @@ export class Animation {
     this.delayBack = delayBack
     this.direction = direction
 
+    const axis = direction === 'left' || direction === 'right' ? 'x' : 'y'
+
+    if (axis !== this.axis) {
+      this.setTransformPosition(
+        this.axis === 'x' ? 0 : undefined,
+        this.axis === 'y' ? 0 : undefined
+      )
+    }
+    this.axis = axis
+
     if (this.iterations === 0) {
       return
     }
 
-    if (startPosition) {
-      const x = this.axis === 'x' ? startPosition : 0
-      const y = this.axis === 'y' ? startPosition : 0
-      this.setTransformPosition(x, y)
-    } else {
-      this.setTransformPosition(0, 0)
-    }
-
-    // Cache values after initial setup
     this.cacheValues()
 
     this.isInited = true

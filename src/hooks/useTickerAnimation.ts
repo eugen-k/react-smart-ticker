@@ -128,8 +128,6 @@ export const useTickerAnimation = ({
   }, [])
 
   useLayoutEffect(() => {
-    const timeoutId: NodeJS.Timeout | null = null
-
     if (isCalculated) {
       animationRef.current.init({
         tickerEl: tickerRef!,
@@ -137,7 +135,6 @@ export const useTickerAnimation = ({
         tickerRect: tickerRect,
         containerRect: containerRect,
         infiniteScrollView,
-        startPosition: 0,
         speed,
         speedBack,
         delay,
@@ -167,7 +164,6 @@ export const useTickerAnimation = ({
     }
 
     return () => {
-      !!timeoutId && clearTimeout(timeoutId)
       setIsPaused(true)
       setIsAnimating(false)
     }

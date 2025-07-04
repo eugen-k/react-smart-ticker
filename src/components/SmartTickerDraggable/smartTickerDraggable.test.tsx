@@ -397,6 +397,7 @@ describe('SmartTickerDraggable', () => {
           pause={(pauseFunc) => {
             pause = pauseFunc
           }}
+          speed={10}
           smart={false}
           autoFill
         >
@@ -512,9 +513,9 @@ describe('SmartTickerDraggable', () => {
       changeVisibility('hidden')
     })
 
-    const pausedPosition = getTransformPosition(wrapper).x
-
     await new Promise((r) => setTimeout(r, 100))
+
+    const pausedPosition = getTransformPosition(wrapper).x
 
     // paused
     expect(getTransformPosition(wrapper).x).toBe(pausedPosition)
@@ -532,7 +533,7 @@ describe('SmartTickerDraggable', () => {
   test('changes position on touchMove to the right', async () => {
     await act(async () => {
       render(
-        <SmartTickerDraggable smart={false} direction='right'>
+        <SmartTickerDraggable smart={false} direction='right' playOnHover>
           Test
         </SmartTickerDraggable>
       )
@@ -556,7 +557,7 @@ describe('SmartTickerDraggable', () => {
   test('changes position on mouseMove to the right', async () => {
     await act(async () => {
       render(
-        <SmartTickerDraggable smart={false} direction='right'>
+        <SmartTickerDraggable smart={false} direction='right' playOnHover>
           Test
         </SmartTickerDraggable>
       )
@@ -609,7 +610,7 @@ describe('SmartTickerDraggable', () => {
   test('changes position on mouseMove to the left', async () => {
     await act(async () => {
       render(
-        <SmartTickerDraggable smart={false} direction='left'>
+        <SmartTickerDraggable smart={false} direction='left' playOnHover>
           Test
         </SmartTickerDraggable>
       )
@@ -633,7 +634,7 @@ describe('SmartTickerDraggable', () => {
   test('changes position on mouseMove to the top', async () => {
     await act(async () => {
       render(
-        <SmartTickerDraggable smart={false} direction='top'>
+        <SmartTickerDraggable smart={false} direction='top' playOnHover>
           Test
         </SmartTickerDraggable>
       )
@@ -657,7 +658,7 @@ describe('SmartTickerDraggable', () => {
   test('changes position on mouseMove to the bottom', async () => {
     await act(async () => {
       render(
-        <SmartTickerDraggable smart={false} direction='bottom'>
+        <SmartTickerDraggable smart={false} direction='bottom' playOnHover>
           Test
         </SmartTickerDraggable>
       )
