@@ -212,29 +212,38 @@ export const SmartTickerDraggable: React.FC<SmartTickerDraggableProps> = ({
       WebkitLineClamp: multiLine,
       WebkitBoxOrient: 'vertical',
       maxHeight: containerRect.height * multiLine
-    }),
-    ...(rtl &&
-      axis === 'x' && {
-        transform: `translate${axis}(-100%)`,
-        left: `${tickerRect.width}px`,
-        ...(isRowEllipses && {
-          left: `${containerRect.width}px`
-        })
-      })
+    })
   }
 
   const wrapperStyle: React.CSSProperties = {
-    [direction]: wrapperRef?.current?.style[direction as keyof CSSStyleDeclaration],
     justifyItems: rtl ? 'flex-end' : 'flex-start',
     flexDirection: axis === 'x' ? 'row' : 'column',
-    transform: `translate3d(${axis === 'x' ? wrapperRef?.current?.style[axis] : 0}px, ${axis === 'y' ? wrapperRef?.current?.style[axis] : 0}px, 0)`,
-    willChange: 'transform',
+    willChange: 'auto',
     backfaceVisibility: 'hidden',
-    ...(isRowEllipses && {
-      transform: `translate${axis}(-${containerRect[axis === 'x' ? 'width' : 'height']}px)`
+    ...(infiniteScrollView && {
+      ...(axis === 'x' && {
+        ...(isRowEllipses && {
+          left: `-${containerRect.width}px`
+        }),
+        ...(!isRowEllipses && {
+          left: `-${tickerRect.width}px`
+        })
+      }),
+      ...(axis === 'y' && {
+        ...(isRowEllipses && {
+          top: `-${containerRect.width}px`
+        }),
+        ...(!isRowEllipses && {
+          top: `-${tickerRect.height}px`
+        })
+      })
     }),
-    ...(!infiniteScrollView && {
-      transform: `translate${axis}(0px)`
+    ...(rtl && {
+      ...(axis === 'x' &&
+        infiniteScrollView &&
+        !isRowEllipses && {
+          left: `-${tickerRect.width * 2 - containerRect.width}px`
+        })
     })
   }
 
