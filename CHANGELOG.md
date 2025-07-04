@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.6.4](https://github.com/eugen-k/react-smart-ticker/compare/v1.6.3...v1.6.4) (2025-07-04)
+
+
+### Bug Fixes
+
+* **animation:** improve transform handling and remove unused parameters ([7ca815f](https://github.com/eugen-k/react-smart-ticker/commit/7ca815fe33f9711cc19ebf5433f7ac84b40bc9b8))
+* **animation:** improve transform handling and remove unused parameters ([eaea8d4](https://github.com/eugen-k/react-smart-ticker/commit/eaea8d4900c01166330352f15c19416bb349f898))
+
 ## [1.6.3](https://github.com/eugen-k/react-smart-ticker/compare/v1.6.2...v1.6.3) (2025-05-28)
 
 
