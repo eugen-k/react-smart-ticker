@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.6.3](https://github.com/eugen-k/react-smart-ticker/compare/v1.6.2...v1.6.3) (2025-05-28)
+
+
+### Bug Fixes
+
+* **animation:** switch positioning to translate3d ([1fb9a9f](https://github.com/eugen-k/react-smart-ticker/commit/1fb9a9fa7609b3feda0a2a0cdde149a1e080ee0e))
+* **animation:** switch positioning to translate3d ([0f4ec84](https://github.com/eugen-k/react-smart-ticker/commit/0f4ec843cbf133046d92fbfd8e00754d3c2cfbb3))
+
 ## [1.6.2](https://github.com/eugen-k/react-smart-ticker/compare/v1.6.1...v1.6.2) (2025-05-28)
 
 
