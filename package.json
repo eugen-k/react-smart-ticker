@@ -1,6 +1,6 @@
 {
   "name": "react-smart-ticker",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "author": "Eugen Korolev <eugen.korolev@gmail.com>",
   "license": "MIT",
   "description": "React component that transforms child elements into a ticker (marquee)",
