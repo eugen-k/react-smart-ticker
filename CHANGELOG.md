@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.6.5](https://github.com/eugen-k/react-smart-ticker/compare/v1.6.4...v1.6.5) (2025-07-05)
+
+
+### Bug Fixes
+
+* **animation:** enhance animation control and improve test precision ([644b5ba](https://github.com/eugen-k/react-smart-ticker/commit/644b5ba8e768b5ed1d7d9570c59af58e7064999a))
+* **animation:** enhance animation control and improve test precision ([1cb88ec](https://github.com/eugen-k/react-smart-ticker/commit/1cb88ec28b86976c873726a7597a231effe5270a))
+
 ## [1.6.4](https://github.com/eugen-k/react-smart-ticker/compare/v1.6.3...v1.6.4) (2025-07-04)
 
 
