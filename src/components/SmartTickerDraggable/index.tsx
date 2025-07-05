@@ -131,7 +131,6 @@ export const SmartTickerDraggable: React.FC<SmartTickerDraggableProps> = ({
       isText &&
       isPaused &&
       !isAnimating &&
-      !pauseOnHover &&
       !isDragging &&
       !isChildFit &&
       !autoFill &&
@@ -149,7 +148,6 @@ export const SmartTickerDraggable: React.FC<SmartTickerDraggableProps> = ({
       isPaused &&
       isText &&
       !isAnimating &&
-      !pauseOnHover &&
       !isDragging &&
       !isChildFit &&
       multiLine &&

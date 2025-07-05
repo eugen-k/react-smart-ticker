@@ -265,7 +265,11 @@ export class Animation {
         }
       }
 
-      if (this.iterations !== 'infinite' && this.iterationCounter >= this.iterations) {
+      if (
+        key === AnimationKey.Forward &&
+        this.iterations !== 'infinite' &&
+        this.iterationCounter >= this.iterations
+      ) {
         this.stopAnimation()
 
         if (typeof onEnd === 'function') {
@@ -376,6 +380,10 @@ export class Animation {
     return this.isDragging
   }
 
+  getIsAnimatingBack(): boolean {
+    return this.reqAnimFrameKey !== null && this.animationState === AnimationKey.Back
+  }
+
   // MARK: play
   play(onEnd?: () => void, continueAfter: boolean = false) {
     if (!this.isInited) return
@@ -446,7 +454,7 @@ export class Animation {
     this.speedBack = speedBack * -1
     this.iterations = iterations
     this.onIterationsEnd = onIterationsEnd || null
-    this.iterationCounter = 0
+    this.iterationCounter = this.iterationCounter || 0
     this.infiniteScrollView = infiniteScrollView
     this.tickerRect = tickerRect
     this.containerRect = containerRect
@@ -456,7 +464,7 @@ export class Animation {
 
     const axis = direction === 'left' || direction === 'right' ? 'x' : 'y'
 
-    if (axis !== this.axis) {
+    if (this.axis && axis !== this.axis) {
       this.setTransformPosition(
         this.axis === 'x' ? 0 : undefined,
         this.axis === 'y' ? 0 : undefined

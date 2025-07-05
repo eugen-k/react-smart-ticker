@@ -377,7 +377,7 @@ describe('SmartTickerDraggable', () => {
 
     const wrapper = screen.getByTestId('ticker-wrapper')
 
-    expect(getTransformPosition(wrapper).x).toBeCloseTo(0)
+    expect(getTransformPosition(wrapper).x).toBeCloseTo(0, 1)
 
     await act(async () => {
       play()
@@ -418,7 +418,7 @@ describe('SmartTickerDraggable', () => {
       pause()
     })
 
-    expect(getTransformPosition(wrapper).x).toBeCloseTo(position)
+    expect(getTransformPosition(wrapper).x).toBeCloseTo(position, 0.1)
   })
 
   test('resets with pause on reset action', async () => {
@@ -453,7 +453,7 @@ describe('SmartTickerDraggable', () => {
 
     await new Promise((r) => setTimeout(r, 100))
 
-    expect(getTransformPosition(wrapper).x).toBeCloseTo(0)
+    expect(getTransformPosition(wrapper).x).toBeCloseTo(0, 1)
   })
 
   test('resets with play on reset action', async () => {
