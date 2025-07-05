@@ -207,7 +207,7 @@ export const useTickerAnimation = ({
   )
 
   useEffect(() => {
-    if (animationRef.current.getIsDragging()) {
+    if (animationRef.current.getIsDragging() || animationRef.current.getIsAnimatingBack()) {
       return
     }
 
@@ -232,7 +232,6 @@ export const useTickerAnimation = ({
     if (pauseOnHover) {
       if (isHovered) {
         setIsPaused(true)
-        setIsAnimating(false)
         animationRef.current.pause()
       } else {
         setIsPaused(false)
