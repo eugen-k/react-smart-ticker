@@ -53,6 +53,10 @@ export class Animation {
   private cachedStyle: CSSStyleDeclaration | null = null
   private isGPUAccelerated: boolean = true
 
+  // Write coalescing / frame-state
+  private isInAnimationFrame = false
+  private writeScheduled = false
+
   private readonly isMobile: boolean = false
 
   // Add internal position tracking
@@ -80,10 +84,18 @@ export class Animation {
       this.getSign()
 
     const { x, y } = this.getTransformPosition()
-    const newX = this.axis === 'x' ? x + step : x
-    const newY = this.axis === 'y' ? y + step : y
+    const rawX = this.axis === 'x' ? x + step : x
+    const rawY = this.axis === 'y' ? y + step : y
+
+    const newX = this.snapToDevicePixel(rawX)
+    const newY = this.snapToDevicePixel(rawY)
 
     this.setTransformPosition(newX, newY)
+  }
+
+  private snapToDevicePixel(value: number): number {
+    const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1
+    return Math.round(value * dpr) / dpr
   }
 
   // MARK: animate
@@ -103,13 +115,16 @@ export class Animation {
     this.animationStartPos = this.axis === 'x' ? x : y
 
     const _animate = (time: number) => {
+      this.isInAnimationFrame = true
       if (!this.prevTime) this.prevTime = time
 
       const fraction = Math.min((time - this.prevTime) / 1000, 0.05)
       this.prevTime = time
       this.draw(fraction)
 
-      if (this.alignPosition(key, onEnd)) {
+      const shouldContinue = this.alignPosition(key, onEnd)
+      this.isInAnimationFrame = false
+      if (shouldContinue) {
         this.reqAnimFrameKey = requestAnimationFrame(_animate.bind(this))
       }
     }
@@ -202,11 +217,21 @@ export class Animation {
       this.currentY = y
       shouldUpdate = true
     }
-    if (shouldUpdate) {
+    if (!shouldUpdate || !this.cachedStyle) return
+
+    if (this.isInAnimationFrame) {
+      // We are already inside rAF; write immediately
+      this.cachedStyle.transform = `translate3d(${this.currentX}px, ${this.currentY}px, 0)`
+      this.writeScheduled = false
+    } else {
+      // Outside rAF (e.g., pointer events). Coalesce to one write per frame.
+      if (this.writeScheduled) return
+      this.writeScheduled = true
       requestAnimationFrame(() => {
         if (this.cachedStyle) {
           this.cachedStyle.transform = `translate3d(${this.currentX}px, ${this.currentY}px, 0)`
         }
+        this.writeScheduled = false
       })
     }
   }
@@ -223,42 +248,43 @@ export class Animation {
     ) {
       switch (this.axis) {
         case 'x': {
-          const tickerWidth = Number(this.tickerEl?.current?.style.minWidth.replace('px', '')) || 0
+          const tickerWidth =
+            (this.tickerRect &&
+              typeof this.tickerRect.width === 'number' &&
+              this.tickerRect.width) ||
+            Number(this.tickerEl?.current?.style.minWidth.replace('px', '')) ||
+            0
 
           if (wrapperX >= tickerWidth) {
             if (!this.isDragging) this.iterationCounter++
-            requestAnimationFrame(() => {
-              this.setTransformPosition(wrapperX - tickerWidth, 0)
-            })
+            this.setTransformPosition(wrapperX - tickerWidth, 0)
             break
           }
 
           if (wrapperX <= -tickerWidth) {
             if (!this.isDragging) this.iterationCounter++
-            requestAnimationFrame(() => {
-              this.setTransformPosition(wrapperX + tickerWidth, 0)
-            })
+            this.setTransformPosition(wrapperX + tickerWidth, 0)
             break
           }
           break
         }
         case 'y': {
           const tickerHeight =
-            Number(this.tickerEl?.current?.style.minHeight.replace('px', '')) || 0
+            (this.tickerRect &&
+              typeof this.tickerRect.height === 'number' &&
+              this.tickerRect.height) ||
+            Number(this.tickerEl?.current?.style.minHeight.replace('px', '')) ||
+            0
 
           if (wrapperY >= tickerHeight) {
             if (!this.isDragging) this.iterationCounter++
-            requestAnimationFrame(() => {
-              this.setTransformPosition(0, wrapperY - tickerHeight)
-            })
+            this.setTransformPosition(0, wrapperY - tickerHeight)
             break
           }
 
           if (wrapperY <= -tickerHeight) {
             if (!this.isDragging) this.iterationCounter++
-            requestAnimationFrame(() => {
-              this.setTransformPosition(0, wrapperY + tickerHeight)
-            })
+            this.setTransformPosition(0, wrapperY + tickerHeight)
             break
           }
           break
