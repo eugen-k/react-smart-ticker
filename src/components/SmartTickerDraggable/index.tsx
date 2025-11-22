@@ -12,7 +12,7 @@ import { useTickerAnimation } from '../../hooks/useTickerAnimation'
  *
  * @visibleName React Smart Ticker
  */
-export const SmartTickerDraggable: React.FC<SmartTickerDraggableProps> = ({
+const SmartTickerDraggable: React.FC<SmartTickerDraggableProps> = ({
   children,
   smart = true,
   autoFill = false,

@@ -79,7 +79,7 @@ export const TickerContainer: FC<Props> = ({
       data-testid={'ticker-container'}
       style={containerStyles}
       {...(typeof onHoverHandler === 'function' && {
-        onMouseOver: () => {
+        onMouseEnter: () => {
           onHoverHandler(true)
         }
       })}

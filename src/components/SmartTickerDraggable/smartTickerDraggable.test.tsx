@@ -2,7 +2,7 @@
 
 import React, { act, ReactNode, useRef } from 'react'
 import { cleanup, render, screen } from '@testing-library/react'
-import { SmartTickerDraggable } from '.'
+import SmartTickerDraggable from '.'
 import { fireEvent, waitFor } from '@testing-library/dom'
 import { SmartTickerDraggableProps } from '../../types/smartTickerTypes'
 

@@ -392,7 +392,7 @@ export const useTickerAnimation = ({
     animationRef.current.setIsDragging(true)
 
     if (wrapperRef.current) {
-      wrapperRef.current.style.willChange = axis === 'x' ? 'left' : 'top'
+      wrapperRef.current.style.willChange = 'transform'
     }
 
     touchListener = onMoveHandler(e)
