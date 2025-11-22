@@ -1,6 +1,6 @@
 {
   "name": "react-smart-ticker",
-  "version": "1.6.6",
+  "version": "1.6.7",
   "author": "Eugen Korolev <eugen.korolev@gmail.com>",
   "license": "MIT",
   "description": "Transforms child elements into a \"smart\", optionally draggable ticker (marquee)",

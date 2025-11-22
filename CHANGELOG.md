@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.6.7](https://github.com/eugen-k/react-smart-ticker/compare/v1.6.6...v1.6.7) (2025-11-22)
+
+
+### Bug Fixes
+
+* replace onMouseOver with onMouseEnter in TickerContainer and optimize animation calculations ([eed6838](https://github.com/eugen-k/react-smart-ticker/commit/eed68383ddff6506fe2c5a13567a9538dcbc368a))
+* update import for SmartTickerDraggable ([b1f07ec](https://github.com/eugen-k/react-smart-ticker/commit/b1f07ecc70d0fd064437f29168314d61c73c7058))
+* update SmartTickerDraggable export and optimize animation performance ([e440e90](https://github.com/eugen-k/react-smart-ticker/commit/e440e9064190b81a0703c1a0402477b733942765))
+
 ## [1.6.6](https://github.com/eugen-k/react-smart-ticker/compare/v1.6.5...v1.6.6) (2025-09-05)
 
 
