@@ -84,18 +84,10 @@ export class Animation {
       this.getSign()
 
     const { x, y } = this.getTransformPosition()
-    const rawX = this.axis === 'x' ? x + step : x
-    const rawY = this.axis === 'y' ? y + step : y
-
-    const newX = this.snapToDevicePixel(rawX)
-    const newY = this.snapToDevicePixel(rawY)
+    const newX = this.axis === 'x' ? x + step : x
+    const newY = this.axis === 'y' ? y + step : y
 
     this.setTransformPosition(newX, newY)
-  }
-
-  private snapToDevicePixel(value: number): number {
-    const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1
-    return Math.round(value * dpr) / dpr
   }
 
   // MARK: animate
