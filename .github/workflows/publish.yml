@@ -4,6 +4,10 @@ on:
   release:
     types: [released]
 
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -18,14 +22,13 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Install dependencies with Yarn
-        run: yarn install
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile # Ensures reproducible builds
 
       - name: Build
         run: yarn build
 
-      # The logic below handles the npm publication:
       - name: Publish
-        run: yarn publish
-        env:
-          NPM_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+        # --access public is mandatory for scoped packages, safe for others
+        # --provenance links the build to your GitHub Action for security
+        run: npm publish --access public --provenance
