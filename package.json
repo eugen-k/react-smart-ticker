@@ -15,6 +15,10 @@
     "draggable"
   ],
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eugen-k/react-smart-ticker.git"
+  },
   "bugs": {
     "url": "https://github.com/eugen-k/react-smart-ticker/issues"
   },
