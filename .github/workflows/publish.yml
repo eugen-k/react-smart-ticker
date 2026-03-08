@@ -4,10 +4,13 @@ on:
   release:
     types: [released]
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   publish:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -15,17 +18,26 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: '24'
 
-      - name: Install dependencies with Yarn
-        run: yarn install
+      - name: Upgrade npm CLI
+        run: npm install -g npm@latest
 
-      - name: Build
-        run: yarn build
+      - name: Debug OIDC Claims
+        run: |
+          # Fetch the token using the internal GitHub variables
+          TOKEN=$(curl -sLS "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=https://registry.npmjs.org" \
+            -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+            | jq -r '.value')
 
-      # The logic below handles the npm publication:
-      - name: Publish
-        run: yarn publish
-        env:
-          NPM_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+          # Decode the middle part of the JWT (the payload) and print it
+          echo "OIDC Payload:"
+          echo $TOKEN | cut -d. -f2 | base64 -d 2>/dev/null | jq .
+
+      - name: Install and Build with Yarn
+        run: |
+          yarn install --frozen-lockfile
+          yarn build
+
+      - name: Publish to npm
+        run: npm publish --access public --provenance
