@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.8](https://github.com/eugen-k/react-smart-ticker/compare/v1.6.7...v1.6.8) (2026-03-08)
+
+
+### Miscellaneous Chores
+
+* release 1.6.8 ([e997df2](https://github.com/eugen-k/react-smart-ticker/commit/e997df252a3650530e5e89247f4d32b11a03d269))
+
 ## [1.6.7](https://github.com/eugen-k/react-smart-ticker/compare/v1.6.6...v1.6.7) (2025-11-22)
 
 
