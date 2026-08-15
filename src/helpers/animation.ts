@@ -67,7 +67,7 @@ export class Animation {
     try {
       // Only keep GPU detection if needed
       this.isGPUAccelerated = 'transform' in document.body.style
-    } catch (e) {
+    } catch {
       this.isGPUAccelerated = false
     }
   }
