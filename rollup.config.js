@@ -1,7 +1,7 @@
 import { terser } from 'rollup-plugin-terser'
 import commonjs from '@rollup/plugin-commonjs'
 import resolve from '@rollup/plugin-node-resolve'
-import typescript from 'rollup-plugin-typescript2'
+import typescript from '@rollup/plugin-typescript'
 import postcssPresetEnv from 'postcss-preset-env'
 import autoprefixer from 'autoprefixer'
 import postcss from 'rollup-plugin-postcss'
@@ -22,15 +22,15 @@ const createConfig = (input, output) => ({
     }
   ],
   plugins: [
-    resolve({ browser: true }),
-    commonjs(),
-    typescript({ tsconfig: './tsconfig.json' }),
     postcss({
       plugins: [postcssPresetEnv(), autoprefixer()],
       extract: false,
       modules: true,
       use: ['sass']
     }),
+    resolve({ browser: true, extensions: ['.js', '.jsx', '.ts', '.tsx'] }),
+    typescript({ tsconfig: './tsconfig.json' }),
+    commonjs(),
     terser()
   ],
   external: ['react', 'react-dom']

@@ -197,14 +197,14 @@ const SmartTicker: React.FC<SmartTickerProps> = ({
     if (tickerRef.current) {
       const currentAnimationName = tickerRef.current.style.animationName
       tickerRef.current.style.animationName = 'none'
-      tickerRef.current.offsetHeight /* trigger reflow */
+      void tickerRef.current.offsetHeight /* trigger reflow */
       tickerRef.current.style.animationName = currentAnimationName
     }
 
     if (tickerCloneElRef.current) {
       const currentAnimationName = tickerCloneElRef.current.style.animationName
       tickerCloneElRef.current.style.animationName = 'none'
-      tickerCloneElRef.current.offsetHeight /* trigger reflow */
+      void tickerCloneElRef.current.offsetHeight /* trigger reflow */
       tickerCloneElRef.current.style.animationName = currentAnimationName
     }
   }
