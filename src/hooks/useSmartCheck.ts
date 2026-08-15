@@ -14,8 +14,8 @@ type Props = {
 }
 
 type UseSmartCheckHook = (args: Props) => {
-  containerRef: RefObject<HTMLDivElement>
-  tickerRef: RefObject<HTMLDivElement>
+  containerRef: RefObject<HTMLDivElement | null>
+  tickerRef: RefObject<HTMLDivElement | null>
   containerRect: ElRect
   tickerRect: ElRect
   isChildFit: boolean

@@ -13,7 +13,7 @@ import { Directions, ElRect, Iterations, SmartTickerHandle } from '../types/smar
 
 type UseTickerAnimationHookParams = {
   isCalculated: boolean
-  tickerRef: React.RefObject<HTMLDivElement> | null
+  tickerRef: React.RefObject<HTMLDivElement | null> | null
   tickerRect: ElRect
   containerRect: ElRect
   direction: Directions
@@ -40,7 +40,7 @@ type UseTickerAnimationHookReturn = {
   onContainerHoverHandler: (hoverState: boolean) => void
   isPaused: boolean
   isAnimating: boolean
-  wrapperRef: React.RefObject<HTMLDivElement> | null
+  wrapperRef: React.RefObject<HTMLDivElement | null> | null
   animation: Animation | null
 }
 

@@ -8,8 +8,8 @@ export enum AnimationKey {
 }
 
 type InitParams = {
-  tickerEl: React.RefObject<HTMLDivElement>
-  wrapperEl: React.RefObject<HTMLDivElement>
+  tickerEl: React.RefObject<HTMLDivElement | null>
+  wrapperEl: React.RefObject<HTMLDivElement | null>
   tickerRect: ElRect
   containerRect: ElRect
   speed: number
@@ -24,9 +24,9 @@ type InitParams = {
 }
 
 export class Animation {
-  private tickerEl: React.RefObject<HTMLDivElement>
+  private tickerEl: React.RefObject<HTMLDivElement | null>
   private tickerRect: ElRect
-  private wrapperEl: React.RefObject<HTMLDivElement>
+  private wrapperEl: React.RefObject<HTMLDivElement | null>
   private containerRect: ElRect
   private axis: 'x' | 'y'
   private direction: Directions

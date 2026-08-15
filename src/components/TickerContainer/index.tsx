@@ -5,7 +5,7 @@ import { debounce } from '../../helpers/debounce'
 
 type Props = {
   direction: SmartTickerProps['direction']
-  containerRef: RefObject<HTMLDivElement>
+  containerRef: RefObject<HTMLDivElement | null>
   containerRect: { width: number; height: number }
   children: ReactNode
   onVisibilityChangeHandler?: () => void
