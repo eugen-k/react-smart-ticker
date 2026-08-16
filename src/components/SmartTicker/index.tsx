@@ -65,7 +65,7 @@ const CSSDirectionParams = {
  *
  * @visibleName React Smart Ticker
  */
-const SmartTicker: React.FC<SmartTickerProps> = ({
+const SmartTicker = ({
   children,
   smart = true,
   isText = true,
@@ -87,7 +87,7 @@ const SmartTicker: React.FC<SmartTickerProps> = ({
   style,
   forwardedRef,
   containerStyle
-}) => {
+}: SmartTickerProps): React.JSX.Element | null => {
   const tickerCloneElRef = useRef<HTMLDivElement>(null)
 
   smart = smart && !autoFill

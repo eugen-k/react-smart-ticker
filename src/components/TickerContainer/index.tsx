@@ -1,4 +1,4 @@
-import React, { CSSProperties, FC, ReactNode, RefObject, useEffect } from 'react'
+import React, { CSSProperties, ReactElement, ReactNode, RefObject, useEffect } from 'react'
 
 import { SmartTickerProps } from '../../types/smartTickerTypes'
 import { debounce } from '../../helpers/debounce'
@@ -17,7 +17,7 @@ type Props = {
   style?: CSSProperties
 }
 
-export const TickerContainer: FC<Props> = ({
+export const TickerContainer = ({
   children,
   containerRef,
   containerRect,
@@ -29,7 +29,7 @@ export const TickerContainer: FC<Props> = ({
   infiniteScrollView,
   onResizeHandler,
   style
-}) => {
+}: Props): ReactElement | null => {
   // const axis = direction === 'left' || direction === 'right' ? 'x' : 'y'
 
   useEffect(() => {
