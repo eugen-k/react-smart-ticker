@@ -502,4 +502,42 @@ describe('SmartTicker', () => {
 
     expect(mockRecalc).toHaveBeenCalled()
   })
+
+  test('does not reset animation when parent component re-renders with same JSX content', async () => {
+    jest.restoreAllMocks()
+
+    let setParentCount: React.Dispatch<React.SetStateAction<number>>
+
+    const ParentComponent = () => {
+      const [count, setCount] = React.useState(0)
+      setParentCount = setCount
+
+      return (
+        <div>
+          <button data-testid="count-btn">{count}</button>
+          <SmartTicker smart={false}>
+            <span>Ticker Text</span>
+          </SmartTicker>
+        </div>
+      )
+    }
+
+    await act(async () => {
+      render(<ParentComponent />)
+    })
+
+    const tickerEl = screen.getByTestId('ticker-1')
+    expect(tickerEl).toHaveStyle({ 'animation-play-state': 'running' })
+    const initialAnimationName = tickerEl.style.animationName
+
+    // Trigger parent state update / re-render
+    await act(async () => {
+      setParentCount!((c) => c + 1)
+    })
+
+    expect(screen.getByTestId('count-btn').textContent).toBe('1')
+    // Animation style should remain unchanged and running
+    expect(tickerEl).toHaveStyle({ 'animation-play-state': 'running' })
+    expect(tickerEl.style.animationName).toBe(initialAnimationName)
+  })
 })

@@ -1,5 +1,6 @@
 import { ReactNode, useRef, useState, useLayoutEffect, RefObject, useEffect } from 'react'
 import { Directions, ElRect } from '../types/smartTickerTypes'
+import { areChildrenEqual } from '../helpers/areChildrenEqual'
 
 type Props = {
   children: ReactNode
@@ -40,6 +41,17 @@ export const useSmartCheck: UseSmartCheckHook = ({
 
   const containerRef = useRef<HTMLDivElement>(null)
   const tickerRef = useRef<HTMLDivElement>(null)
+  const prevChildrenRef = useRef<ReactNode>(children)
+  const prevDepsRef = useRef<unknown[]>(recalcDeps)
+  const isCheckingRef = useRef(false)
+  const prevPropsRef = useRef({
+    smart,
+    autoFill,
+    multiLine,
+    speed,
+    direction,
+    infiniteScrollView
+  })
 
   const [containerRect, setContainerRect] = useState<ElRect>({ width: 0, height: 0 })
   const [tickerRect, setTickerRect] = useState<ElRect>({ width: 0, height: 0 })
@@ -47,7 +59,168 @@ export const useSmartCheck: UseSmartCheckHook = ({
   const [amountToFill, setAmountToFill] = useState(1)
   const [isChildFit, setIsChildFit] = useState(true)
   const [isCalculated, setIsCalculated] = useState(false)
-  const [recalcToken, setRecalcToken] = useState(new Date().getTime())
+  const [recalcToken, setRecalcToken] = useState(0)
+
+  const recalc = () => {
+    setRecalcToken((prev) => prev + 1)
+  }
+
+  const smartCheck = () => {
+    if (isCheckingRef.current) return
+    if (tickerRef.current && containerRef.current) {
+      isCheckingRef.current = true
+      try {
+        // save the original styles
+        const {
+          display: mDisplay,
+          minWidth: mMinWidth,
+          minHeight: mMinHeight,
+          maxWidth: mMaxWidth,
+          maxHeight: mMaxHeight,
+          whiteSpace: mWhiteSpace,
+          overflow: mOverflow,
+          transform: mTransform,
+          willChange: mWillChange
+        } = tickerRef.current.style
+
+        const {
+          width: cWidth,
+          height: cHeight,
+          maxWidth: cMaxWidth,
+          maxHeight: cMaxHeight,
+          overflow: cOverflow,
+          display: cDisplay,
+          transform: cTransform
+        } = containerRef.current.style
+
+        // Set measurement styles
+        tickerRef.current.style.transform = 'none'
+        tickerRef.current.style.willChange = 'transform'
+        tickerRef.current.style.display = 'inline-flex'
+        tickerRef.current.style.minWidth = 'auto'
+        tickerRef.current.style.minHeight = 'auto'
+        tickerRef.current.style.maxWidth = 'unset'
+        tickerRef.current.style.maxHeight = 'unset'
+        containerRef.current.style.display = 'inline-flex'
+        containerRef.current.style.maxWidth = '100%'
+        containerRef.current.style.maxHeight = '100%'
+
+        if (autoFill) {
+          containerRef.current.style.height = '100%'
+          containerRef.current.style.width = '100%'
+        }
+
+        containerRef.current.style.overflow = 'hidden'
+        tickerRef.current.style.overflow = 'visible'
+
+        // Get measurements
+        let { width: containerWidth, height: containerHeight } =
+          containerRef.current.getBoundingClientRect()
+        let { width: tickerWidth, height: tickerHeight } = tickerRef.current.getBoundingClientRect()
+
+        // get a line height if the content is text
+        let lineHeight = 0
+        if (multiLine) {
+          tickerRef.current.style.whiteSpace = 'nowrap'
+          const { height } = tickerRef.current.getBoundingClientRect()
+          lineHeight = height
+          tickerRef.current.style.whiteSpace = mWhiteSpace
+        }
+
+        containerWidth = Math.min(containerWidth, document.documentElement.clientWidth)
+        containerHeight = Math.min(containerHeight, document.documentElement.clientHeight)
+
+        if (multiLine) {
+          containerHeight = Math.min(lineHeight * multiLine, containerHeight)
+        }
+
+        // reset styles back
+        tickerRef.current.style.display = mDisplay
+        tickerRef.current.style.minWidth = mMinWidth
+        tickerRef.current.style.minHeight = mMinHeight
+        tickerRef.current.style.maxWidth = mMaxWidth
+        tickerRef.current.style.maxHeight = mMaxHeight
+        containerRef.current.style.maxWidth = cMaxWidth
+        containerRef.current.style.maxHeight = cMaxHeight
+        containerRef.current.style.height = cHeight
+        containerRef.current.style.width = cWidth
+        containerRef.current.style.overflow = cOverflow
+        containerRef.current.style.display = cDisplay
+        tickerRef.current.style.overflow = mOverflow
+        tickerRef.current.style.whiteSpace = mWhiteSpace
+        tickerRef.current.style.transform = mTransform
+        tickerRef.current.style.willChange = mWillChange
+        containerRef.current.style.transform = cTransform
+
+        // Continue with calculations
+        let _isChildFit: boolean = autoFill ? false : true
+        let _amountToFill = 1
+        let _duration = 0
+
+        switch (axis) {
+          case 'x': {
+            _amountToFill =
+              autoFill && Math.round(tickerWidth) !== Math.round(containerWidth)
+                ? Math.ceil(containerWidth / tickerWidth)
+                : 1
+
+            if (Math.round(tickerWidth) > Math.round(containerWidth) || autoFill) {
+              _isChildFit = false
+            }
+
+            if (_amountToFill > 1) {
+              tickerWidth = tickerWidth * _amountToFill
+            }
+
+            if (_isChildFit) {
+              tickerWidth = containerWidth
+            }
+
+            _duration = Math.max(tickerWidth, containerWidth) / speed
+            break
+          }
+          case 'y': {
+            _amountToFill =
+              autoFill && Math.round(tickerHeight) !== Math.round(containerHeight)
+                ? Math.ceil(containerHeight / tickerHeight)
+                : 1
+
+            if (Math.round(tickerHeight) > Math.round(containerHeight) || autoFill) {
+              _isChildFit = false
+            }
+
+            if (_amountToFill > 1) {
+              tickerHeight = tickerHeight * _amountToFill
+            }
+
+            if (_isChildFit) {
+              tickerHeight = containerHeight
+            }
+
+            _duration = Math.max(tickerHeight, containerHeight) / speed
+            break
+          }
+        }
+
+        setAmountToFill((prev) => (prev === _amountToFill ? prev : _amountToFill))
+        setContainerRect((prev) =>
+          prev.width === containerWidth && prev.height === containerHeight
+            ? prev
+            : { height: containerHeight, width: containerWidth }
+        )
+        setTickerRect((prev) =>
+          prev.width === tickerWidth && prev.height === tickerHeight
+            ? prev
+            : { height: tickerHeight, width: tickerWidth }
+        )
+        setIsChildFit((prev) => (prev === _isChildFit ? prev : _isChildFit))
+        setDuration((prev) => (prev === _duration ? prev : _duration))
+        setIsCalculated(true)
+      } finally {
+        isCheckingRef.current = false
+      }
+    }
+  }
 
   useLayoutEffect(() => {
     if (waitForFonts) {
@@ -61,167 +234,68 @@ export const useSmartCheck: UseSmartCheckHook = ({
   }, [recalcToken])
 
   useEffect(() => {
-    // prevent reset while the initial component loading
-    if (isCalculated) {
+    // Only check for updates after initial calculation has succeeded
+    if (!isCalculated) return
+
+    const childrenChanged = !areChildrenEqual(prevChildrenRef.current, children)
+    if (childrenChanged) {
+      prevChildrenRef.current = children
+    }
+
+    const depsChanged =
+      recalcDeps.length !== prevDepsRef.current.length ||
+      recalcDeps.some((dep, i) => dep !== prevDepsRef.current[i])
+    if (depsChanged) {
+      prevDepsRef.current = recalcDeps
+    }
+
+    const prevProps = prevPropsRef.current
+    const propsChanged =
+      prevProps.smart !== smart ||
+      prevProps.autoFill !== autoFill ||
+      prevProps.multiLine !== multiLine ||
+      prevProps.speed !== speed ||
+      prevProps.direction !== direction ||
+      prevProps.infiniteScrollView !== infiniteScrollView
+
+    if (propsChanged) {
+      prevPropsRef.current = {
+        smart,
+        autoFill,
+        multiLine,
+        speed,
+        direction,
+        infiniteScrollView
+      }
+    }
+
+    if (childrenChanged || depsChanged || propsChanged) {
       recalc()
     }
-  }, [children, smart, autoFill, multiLine, speed, direction, infiniteScrollView, ...recalcDeps])
+  }, [children, smart, autoFill, multiLine, speed, direction, infiniteScrollView, recalcDeps])
 
-  const recalc = () => {
-    setAmountToFill(1)
-    setIsChildFit(true)
-    setDuration(0)
-    setIsCalculated(false)
-    setRecalcToken(new Date().getTime())
-  }
+  useEffect(() => {
+    if (typeof ResizeObserver === 'undefined') return
+    const containerEl = containerRef.current
+    const tickerEl = tickerRef.current
+    if (!containerEl || !tickerEl) return
 
-  const smartCheck = () => {
-    if (tickerRef.current && containerRef.current) {
-      // save the original styles
-      const {
-        display: mDisplay,
-        minWidth: mMinWidth,
-        minHeight: mMinHeight,
-        maxWidth: mMaxWidth,
-        maxHeight: mMaxHeight,
-        whiteSpace: mWhiteSpace,
-        overflow: mOverflow,
-        transform: mTransform,
-        willChange: mWillChange
-      } = tickerRef.current.style
+    let animationFrameId: number | null = null
+    const observer = new ResizeObserver(() => {
+      if (animationFrameId !== null) cancelAnimationFrame(animationFrameId)
+      animationFrameId = requestAnimationFrame(() => {
+        smartCheck()
+      })
+    })
 
-      const {
-        width: cWidth,
-        height: cHeight,
-        maxWidth: cMaxWidth,
-        maxHeight: cMaxHeight,
-        overflow: cOverflow,
-        display: cDisplay,
-        transform: cTransform
-      } = containerRef.current.style
+    observer.observe(containerEl)
+    observer.observe(tickerEl)
 
-      // Set measurement styles
-      tickerRef.current.style.transform = 'none'
-      tickerRef.current.style.willChange = 'transform'
-      tickerRef.current.style.display = 'inline-flex'
-      tickerRef.current.style.minWidth = 'auto'
-      tickerRef.current.style.minHeight = 'auto'
-      tickerRef.current.style.maxWidth = 'unset'
-      tickerRef.current.style.maxHeight = 'unset'
-      containerRef.current.style.display = 'inline-flex'
-      containerRef.current.style.maxWidth = '100%'
-      containerRef.current.style.maxHeight = '100%'
-
-      if (autoFill) {
-        containerRef.current.style.height = '100%'
-        containerRef.current.style.width = '100%'
-      }
-
-      containerRef.current.style.overflow = 'hidden'
-      tickerRef.current.style.overflow = 'visible'
-
-      // Get measurements
-      let { width: containerWidth, height: containerHeight } =
-        containerRef.current.getBoundingClientRect()
-      let { width: tickerWidth, height: tickerHeight } = tickerRef.current.getBoundingClientRect()
-
-      // get a line height if the content is text
-      let lineHeight = 0
-      if (multiLine) {
-        tickerRef.current.style.whiteSpace = 'nowrap'
-        const { height } = tickerRef.current.getBoundingClientRect()
-        lineHeight = height
-        tickerRef.current.style.whiteSpace = mWhiteSpace
-      }
-
-      containerWidth = Math.min(containerWidth, document.documentElement.clientWidth)
-      containerHeight = Math.min(containerHeight, document.documentElement.clientHeight)
-
-      if (multiLine) {
-        containerHeight = Math.min(lineHeight * multiLine, containerHeight)
-      }
-
-      // reset styles back
-      tickerRef.current.style.display = mDisplay
-      tickerRef.current.style.minWidth = mMinWidth
-      tickerRef.current.style.minHeight = mMinHeight
-      tickerRef.current.style.maxWidth = mMaxWidth
-      tickerRef.current.style.maxHeight = mMaxHeight
-      containerRef.current.style.maxWidth = cMaxWidth
-      containerRef.current.style.maxHeight = cMaxHeight
-      containerRef.current.style.height = cHeight
-      containerRef.current.style.width = cWidth
-      containerRef.current.style.overflow = cOverflow
-      containerRef.current.style.display = cDisplay
-      tickerRef.current.style.overflow = mOverflow
-      tickerRef.current.style.whiteSpace = mWhiteSpace
-      tickerRef.current.style.transform = mTransform
-      tickerRef.current.style.willChange = mWillChange
-      containerRef.current.style.transform = cTransform
-
-      // Continue with calculations
-      let _isChildFit: boolean = autoFill ? false : true
-
-      switch (axis) {
-        case 'x': {
-          const amountToFill =
-            autoFill && Math.round(tickerWidth) !== Math.round(containerWidth)
-              ? Math.ceil(containerWidth / tickerWidth)
-              : 1
-
-          setAmountToFill(amountToFill)
-
-          if (Math.round(tickerWidth) > Math.round(containerWidth) || autoFill) {
-            _isChildFit = false
-          }
-
-          if (amountToFill > 1) {
-            tickerWidth = tickerWidth * amountToFill
-          }
-
-          if (_isChildFit) {
-            tickerWidth = containerWidth
-          }
-
-          setDuration(Math.max(tickerWidth, containerWidth) / speed)
-          break
-        }
-        case 'y': {
-          const amountToFill =
-            autoFill && Math.round(tickerHeight) !== Math.round(containerHeight)
-              ? Math.ceil(containerHeight / tickerHeight)
-              : 1
-
-          setAmountToFill(amountToFill)
-
-          if (Math.round(tickerHeight) > Math.round(containerHeight) || autoFill) {
-            _isChildFit = false
-          }
-
-          /* if (_isChildFit && amountToFill === 1) {
-            containerHeight = Math.min(tickerHeight, containerHeight)
-            } */
-
-          if (amountToFill > 1) {
-            tickerHeight = tickerHeight * amountToFill
-          }
-
-          if (_isChildFit) {
-            tickerHeight = containerHeight
-          }
-
-          setDuration(Math.max(tickerHeight, containerHeight) / speed)
-          break
-        }
-      }
-
-      setContainerRect({ height: containerHeight, width: containerWidth })
-      setTickerRect({ height: tickerHeight, width: tickerWidth })
-
-      setIsChildFit(_isChildFit)
-      setIsCalculated(true)
+    return () => {
+      if (animationFrameId !== null) cancelAnimationFrame(animationFrameId)
+      observer.disconnect()
     }
-  }
+  }, [isCalculated])
 
   return {
     containerRef,
