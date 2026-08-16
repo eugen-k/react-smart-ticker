@@ -140,10 +140,19 @@ const SmartTicker = ({
     }
   }))
 
+  const prevConfigRef = useRef({ isCalculated: false, playOnDemand, direction })
+
   useLayoutEffect(() => {
-    setIsPaused((smart && isChildFit) || playOnDemand)
-    resetPosition()
-  }, [isCalculated, playOnDemand])
+    const isFirstCalc = !prevConfigRef.current.isCalculated && isCalculated
+    const playOnDemandChanged = prevConfigRef.current.playOnDemand !== playOnDemand
+    const directionChanged = prevConfigRef.current.direction !== direction
+
+    if (isFirstCalc || playOnDemandChanged || directionChanged) {
+      prevConfigRef.current = { isCalculated, playOnDemand, direction }
+      setIsPaused((smart && isChildFit) || playOnDemand)
+      resetPosition()
+    }
+  }, [isCalculated, playOnDemand, direction, smart, isChildFit])
 
   useEffect(() => {
     if (isPaused && playOnDemand && isCalculated) {

@@ -813,4 +813,46 @@ describe('SmartTickerDraggable', () => {
 
     expect(getTransformPosition(wrapper).x).toBe(0) // Ensure no dragging occurred
   })
+
+  test('does not reset position when parent component re-renders', async () => {
+    let setParentState: React.Dispatch<React.SetStateAction<number>>
+
+    const ParentComponent = () => {
+      const [count, setCount] = React.useState(0)
+      setParentState = setCount
+
+      return (
+        <div>
+          <button data-testid="count-btn">{count}</button>
+          <SmartTickerDraggable smart={false} direction="left" speed={50}>
+            <span>Draggable Ticker Content</span>
+          </SmartTickerDraggable>
+        </div>
+      )
+    }
+
+    await act(async () => {
+      render(<ParentComponent />)
+    })
+
+    const wrapper = screen.getByTestId('ticker-wrapper')
+
+    await new Promise((r) => setTimeout(r, 100))
+
+    const posBefore = getTransformPosition(wrapper).x
+    expect(posBefore).toBeLessThan(0)
+
+    // Trigger parent state update
+    await act(async () => {
+      setParentState!((c) => c + 1)
+    })
+
+    expect(screen.getByTestId('count-btn').textContent).toBe('1')
+
+    await new Promise((r) => setTimeout(r, 100))
+
+    const posAfter = getTransformPosition(wrapper).x
+    // Position should continue advancing, not restart at 0
+    expect(posAfter).toBeLessThan(posBefore)
+  })
 })
