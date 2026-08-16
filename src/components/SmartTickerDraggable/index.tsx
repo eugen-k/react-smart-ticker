@@ -12,7 +12,7 @@ import { useTickerAnimation } from '../../hooks/useTickerAnimation'
  *
  * @visibleName React Smart Ticker
  */
-const SmartTickerDraggable: React.FC<SmartTickerDraggableProps> = ({
+const SmartTickerDraggable = ({
   children,
   smart = true,
   autoFill = false,
@@ -35,7 +35,7 @@ const SmartTickerDraggable: React.FC<SmartTickerDraggableProps> = ({
   disableSelect = false,
   disableDragging = false,
   forwardedRef
-}) => {
+}: SmartTickerDraggableProps): React.JSX.Element | null => {
   smart = smart && !autoFill
   pauseOnHover = playOnHover ? false : pauseOnHover
 
