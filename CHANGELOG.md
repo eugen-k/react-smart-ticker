@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.6.10](https://github.com/eugen-k/react-smart-ticker/compare/v1.6.9...v1.6.10) (2026-08-16)
+
+
+### Bug Fixes
+
+* replace FC type annotations with explicit return types for bette… ([c0dd84b](https://github.com/eugen-k/react-smart-ticker/commit/c0dd84b03099ccde3549fb70f78e04896e34b94f))
+* replace FC type annotations with explicit return types for better component type safety ([7ffc12b](https://github.com/eugen-k/react-smart-ticker/commit/7ffc12bb7831a6d56547442bfd093641b3cc714a))
+* smart-checking with manual change detection and layout measureme… ([04682a3](https://github.com/eugen-k/react-smart-ticker/commit/04682a367fd9338746bf56b3bb06b4a0d7a459c4))
+* smart-checking with manual change detection and layout measurement logic ([8d71376](https://github.com/eugen-k/react-smart-ticker/commit/8d71376df0453481c6570dd269f22e25117a68df))
+
 ## [1.6.9](https://github.com/eugen-k/react-smart-ticker/compare/v1.6.8...v1.6.9) (2026-08-15)
 
 
